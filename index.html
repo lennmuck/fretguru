@@ -626,7 +626,7 @@
 
         .fretboard {
             display: grid;
-            grid-template-columns: 50px repeat(13, 1fr);
+            grid-template-columns: 50px repeat(var(--fret-count, 13), 1fr);
             gap: 2px;
             min-width: 900px;
             position: relative;
@@ -754,8 +754,8 @@
         }
 
         .note.dimmed {
-            background: rgba(255,255,255,0.1);
-            color: rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.5);
+            color: rgba(11, 0, 36, 0.9);
         }
 
         /* CAGED Shape Colors */
@@ -1110,7 +1110,7 @@
                 <p style="font-size: 0.85rem; color: #aaa; line-height: 1.5;">
                     Elk akkoord kun je in 5 vormen spelen.<br>
                     <strong style="color: #fff;">Volgorde over de hals:</strong><br>
-                    <span style="color: #ef4444;">C</span> → 
+                    <span style="color: #83704d;">C</span> → 
                     <span style="color: #f59e0b;">A</span> → 
                     <span style="color: #10b981;">G</span> → 
                     <span style="color: #3b82f6;">E</span> → 
@@ -1124,9 +1124,11 @@
             <div class="panel">
                 <h3><span class="icon">🎵</span> Toonsoort</h3>
                 <div class="root-notes" id="backingRootNotes"></div>
-                <div class="chord-type-selector" style="margin-top: 12px;">
+                <div class="chord-type-selector" style="margin-top: 12px; flex-wrap: wrap;">
                     <button class="chord-type-btn active" data-backing-scale="minorPentatonic">Mineur Penta</button>
                     <button class="chord-type-btn" data-backing-scale="majorPentatonic">Majeur Penta</button>
+                    <button class="chord-type-btn" data-backing-scale="minor">Mineur</button>
+                    <button class="chord-type-btn" data-backing-scale="major">Majeur</button>
                 </div>
             </div>
 
@@ -1157,6 +1159,13 @@
             <button class="quiz-next" id="quizNext" style="display:none;">Volgende vraag →</button>
         </div>
 
+        <!-- Fretboard settings -->
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 10px; gap: 10px;">
+            <button id="fretToggle" style="padding: 6px 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #888; border-radius: 6px; cursor: pointer; font-size: 0.8rem;">
+                Toon minder frets (12)
+            </button>
+        </div>
+
         <!-- Fretboard -->
         <div class="fretboard-container">
             <div class="fretboard" id="fretboard"></div>
@@ -1180,7 +1189,14 @@
         const TUNING = ['E', 'B', 'G', 'D', 'A', 'E'];
 
         // Chord colors for backing track mode
-        const CHORD_COLORS = [            { bg: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', hex: '#ef4444', name: 'Rood' },            { bg: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', hex: '#f59e0b', name: 'Oranje' },            { bg: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', hex: '#10b981', name: 'Groen' },            { bg: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', hex: '#3b82f6', name: 'Blauw' },            { bg: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)', hex: '#8b5cf6', name: 'Paars' },            { bg: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)', hex: '#ec4899', name: 'Roze' }        ];
+        const CHORD_COLORS = [
+    { bg: 'linear-gradient(135deg, #4a9d9a 0%, #3d8280 100%)', hex: '#4a9d9a', name: 'Teal' },
+    { bg: 'linear-gradient(135deg, #d4915d 0%, #b87a4a 100%)', hex: '#d4915d', name: 'Terracotta' },
+    { bg: 'linear-gradient(135deg, #7b68a6 0%, #65568a 100%)', hex: '#7b68a6', name: 'Druif' },
+    { bg: 'linear-gradient(135deg, #5b8dbf 0%, #4a75a0 100%)', hex: '#5b8dbf', name: 'Staal' },
+    { bg: 'linear-gradient(135deg, #c9657a 0%, #a85265 100%)', hex: '#c9657a', name: 'Bes' },
+    { bg: 'linear-gradient(135deg, #6b9b6e 0%, #588059 100%)', hex: '#6b9b6e', name: 'Bos' }
+];
 
         const SCALES = {
             minorPentatonic: {
@@ -1327,6 +1343,9 @@
 
         const BACKING_TOGGLE_CONFIG = [
             { key: 'showNotes', label: 'Toon nootnamen', help: 'Toont de letter van elke noot.' },
+            { key: 'showIntervals', label: 'Toon intervallen', help: 'Toont het interval (1, b3, 5, etc.).' },
+            // { key: 'showChordTones', label: 'Highlight 1-3-5', help: 'Akkoordtonen van de toonsoort in groen.' },
+            // { key: 'showTriads', label: 'Toon triads', help: 'Triad posities in oranje.' },
             { key: 'showAllNotes', label: 'Toon alle noten', help: 'Toon ook noten buiten de toonladder (dimmed).' },
             { key: 'showOnlyChordNotes', label: 'Alleen akkoordnoten', help: 'Verberg toonladder noten, toon alleen akkoordnoten.' }
         ];
@@ -1336,7 +1355,7 @@
         // ============================================
         
         const state = {
-            mainMode: 'scales',
+            mainMode: 'backing',
             
             // Scales mode
             rootNote: 'A',
@@ -1377,6 +1396,10 @@
             quizTotal: 0,
             currentQuiz: null,
             answered: false,
+
+            // Fretboard settings
+            maxFret: 17,
+
         };
 
         // ============================================
@@ -1517,22 +1540,31 @@
             const lowEIndex = getNoteIndex('E');
             let rootFretOnLowE = (rootIndex - lowEIndex + 12) % 12;
             
+            // Pentatonic box definitions (frets relative to root)
+            // Each box is about 3-4 frets wide, they connect seamlessly
             const boxDefs = [
-                { start: 0, end: 3 },
-                { start: 3, end: 6 },
-                { start: 5, end: 8 },
-                { start: 7, end: 10 },
-                { start: 10, end: 13 }
+                { start: 0, end: 3 },    // Box 1
+                { start: 3, end: 5 },    // Box 2
+                { start: 5, end: 7 },    // Box 3
+                { start: 7, end: 10 },   // Box 4
+                { start: 10, end: 12 }   // Box 5
             ];
             
             const box = boxDefs[boxIndex];
-            const boxStart = (rootFretOnLowE + box.start) % 12;
-            const boxEnd = (rootFretOnLowE + box.end) % 12;
+            const boxStart = rootFretOnLowE + box.start;
+            const boxEnd = rootFretOnLowE + box.end;
             
-            if (boxStart <= boxEnd) {
-                return fret >= boxStart && fret <= boxEnd;
-            }
-            return fret >= boxStart || fret <= boxEnd;
+            // Check primary position
+            if (fret >= boxStart && fret <= boxEnd) return true;
+            
+            // Check octave repeat (12 frets higher)
+            if (fret >= boxStart + 12 && fret <= boxEnd + 12) return true;
+            
+            // Check lower octave (when root is high on the neck)
+            // E.g., root at fret 10, box 1 at frets 10-13, but also at frets -2 to 1 (= frets 0-1)
+            if (boxStart > 0 && fret >= 0 && fret <= boxEnd - 12) return true;
+            
+            return false;
         }
 
         // ============================================
@@ -1714,14 +1746,15 @@
                 triadShapePositions = getTriadShapePositions(state.rootNote, state.scaleType);
             }
             
-            fb.innerHTML += ['', ...Array.from({length: 13}, (_, i) => i)].map(n => 
+            fb.style.setProperty('--fret-count', state.maxFret + 1);
+            fb.innerHTML += ['', ...Array.from({length: state.maxFret + 1}, (_, i) => i)].map(n =>
                 `<div class="fret-number">${n}</div>`
             ).join('');
             
             for (let str = 0; str < 6; str++) {
                 fb.innerHTML += `<div class="fret open-string"><span class="string-label">${TUNING[str]}</span></div>`;
                 
-                for (let fret = 0; fret <= 12; fret++) {
+                for (let fret = 0; fret <= state.maxFret; fret++) {
                     const note = getNoteAtFret(str, fret);
                     const inScale = isNoteInScale(note, state.rootNote, state.scaleType);
                     const isRoot = isRootNote(note, state.rootNote);
@@ -1765,7 +1798,7 @@
                     
                     let marker = '';
                     if (str === 5) {
-                        if ([3, 5, 7, 9].includes(fret)) marker = '<div class="fret-marker"></div>';
+                        if ([3, 5, 7, 9, 15, 17].includes(fret)) marker = '<div class="fret-marker"></div>';
                         else if (fret === 12) marker = '<div class="fret-marker double"></div>';
                     }
                     
@@ -1792,14 +1825,15 @@
                 if (!noteLookup[key]) noteLookup[key] = n;
             });
             
-            fb.innerHTML += ['', ...Array.from({length: 13}, (_, i) => i)].map(n => 
+            fb.style.setProperty('--fret-count', state.maxFret + 1);
+            fb.innerHTML += ['', ...Array.from({length: state.maxFret + 1}, (_, i) => i)].map(n =>
                 `<div class="fret-number">${n}</div>`
             ).join('');
             
             for (let str = 0; str < 6; str++) {
                 fb.innerHTML += `<div class="fret open-string"><span class="string-label">${TUNING[str]}</span></div>`;
                 
-                for (let fret = 0; fret <= 12; fret++) {
+                for (let fret = 0; fret <= state.maxFret; fret++) {
                     const note = getNoteAtFret(str, fret);
                     const key = `${str}-${fret}`;
                     const cagedNote = noteLookup[key];
@@ -1818,7 +1852,7 @@
                     
                     let marker = '';
                     if (str === 5) {
-                        if ([3, 5, 7, 9].includes(fret)) marker = '<div class="fret-marker"></div>';
+                        if ([3, 5, 7, 9, 15, 17].includes(fret)) marker = '<div class="fret-marker"></div>';
                         else if (fret === 12) marker = '<div class="fret-marker double"></div>';
                     }
                     
@@ -1835,14 +1869,24 @@
             
             const scaleNotes = getScaleNotes(state.backingRoot, state.backingScale);
             
-            fb.innerHTML += ['', ...Array.from({length: 13}, (_, i) => i)].map(n => 
+            // Pre-calculate triad positions if needed
+            let triadShapePositions = [];
+            if (state.showTriads) {
+                triadShapePositions = getTriadShapePositions(state.backingRoot, state.backingScale);
+            }
+            
+            // Get chord tones (1-3-5) of the root
+            const rootChordTones = getTriadNotes(state.backingRoot, state.backingScale);
+            
+            fb.style.setProperty('--fret-count', state.maxFret + 1);
+            fb.innerHTML += ['', ...Array.from({length: state.maxFret + 1}, (_, i) => i)].map(n => 
                 `<div class="fret-number">${n}</div>`
             ).join('');
             
             for (let str = 0; str < 6; str++) {
                 fb.innerHTML += `<div class="fret open-string"><span class="string-label">${TUNING[str]}</span></div>`;
                 
-                for (let fret = 0; fret <= 12; fret++) {
+                for (let fret = 0; fret <= state.maxFret; fret++) {
                     const note = getNoteAtFret(str, fret);
                     const inScale = scaleNotes.includes(note);
                     const isRoot = note === state.backingRoot;
@@ -1850,27 +1894,47 @@
                     const chordMembership = getNoteChordMembership(note);
                     const isInAnyChord = chordMembership.length > 0;
                     
+                    // Check for chord tones and triads
+                    const isChordTone = rootChordTones.includes(note);
+                    const isInTriadShape = triadShapePositions.some(p => p.string === str && p.fret === fret);
+                    
                     let content = '';
+                    let noteStyle = '';
+                    let noteClass = '';
                     
                     if (state.backingChords.length === 0) {
-                        // No chords added yet - just show scale
+                        // No chords added yet - show scale with optional chord tones/triads
                         if (inScale) {
-                            let noteClass = 'scale-note';
+                            noteClass = 'scale-note';
+                            if (state.showChordTones && isChordTone) noteClass = 'chord-tone';
+                            if (state.showTriads && isInTriadShape) noteClass = 'triad-note';
                             if (state.highlightRoot && isRoot) noteClass = 'root';
-                            content = state.showNotes 
-                                ? `<div class="note ${noteClass}">${note}</div>`
-                                : `<div class="note ${noteClass}"></div>`;
+                            
+                            // Build content
+                            if (state.showNotes && state.showIntervals) {
+                                const interval = getIntervalName(state.backingRoot, note, state.backingScale);
+                                content = `<div class="note ${noteClass} with-interval">
+                                    <span class="note-name">${note}</span>
+                                    <span class="interval-name">${interval}</span>
+                                </div>`;
+                            } else if (state.showNotes) {
+                                content = `<div class="note ${noteClass}">${note}</div>`;
+                            } else if (state.showIntervals) {
+                                const interval = getIntervalName(state.backingRoot, note, state.backingScale);
+                                content = `<div class="note ${noteClass}">${interval}</div>`;
+                            } else {
+                                content = `<div class="note ${noteClass}"></div>`;
+                            }
                         } else if (state.showAllNotes) {
                             content = `<div class="note dimmed">${state.showNotes ? note : ''}</div>`;
                         }
                     } else {
-                        // Chords are added
+                        // Chords are added - color by chord membership
                         if (isInAnyChord) {
-                            // Note is in one or more chords - show with chord colors
+                            // Note is in one or more chords
                             if (chordMembership.length === 1) {
                                 const colorIdx = chordMembership[0] % CHORD_COLORS.length;
-                                const style = `background: ${CHORD_COLORS[colorIdx].bg}; box-shadow: 0 0 10px ${CHORD_COLORS[colorIdx].hex}40;`;
-                                content = `<div class="note" style="${style}">${state.showNotes ? note : ''}</div>`;
+                                noteStyle = `background: ${CHORD_COLORS[colorIdx].bg}; box-shadow: 0 0 10px ${CHORD_COLORS[colorIdx].hex}40;`;
                             } else {
                                 // Multiple chords - pie chart
                                 const anglePerChord = 360 / chordMembership.length;
@@ -1881,14 +1945,51 @@
                                     const endAngle = (i + 1) * anglePerChord;
                                     gradientParts.push(`${color} ${startAngle}deg ${endAngle}deg`);
                                 });
-                                const gradient = `conic-gradient(${gradientParts.join(', ')})`;
-                                content = `<div class="note" style="background: ${gradient}; box-shadow: 0 0 12px rgba(255,255,255,0.3);">${state.showNotes ? note : ''}</div>`;
+                                noteStyle = `background: conic-gradient(${gradientParts.join(', ')}); box-shadow: 0 0 12px rgba(255,255,255,0.3);`;
+                            }
+                            
+                            // Build content with intervals if enabled
+                            if (state.showNotes && state.showIntervals) {
+                                const interval = getIntervalName(state.backingRoot, note, state.backingScale);
+                                content = `<div class="note with-interval" style="${noteStyle}">
+                                    <span class="note-name">${note}</span>
+                                    <span class="interval-name">${interval}</span>
+                                </div>`;
+                            } else if (state.showNotes) {
+                                content = `<div class="note" style="${noteStyle}">${note}</div>`;
+                            } else if (state.showIntervals) {
+                                const interval = getIntervalName(state.backingRoot, note, state.backingScale);
+                                content = `<div class="note" style="${noteStyle}">${interval}</div>`;
+                            } else {
+                                content = `<div class="note" style="${noteStyle}"></div>`;
                             }
                         } else if (inScale && !state.showOnlyChordNotes) {
-                            // In scale but not in chord - pastel blue/beige
-                            const style = `background: linear-gradient(135deg, #7c9cb8 0%, #5a7a8a 100%); 
-                                           box-shadow: 0 0 8px rgba(124, 156, 184, 0.4);`;
-                            content = `<div class="note" style="${style}">${state.showNotes ? note : ''}</div>`;
+                            // In scale but not in any backing chord
+                            // Still check for root chord tones and triads
+                            let scaleStyle = `background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 0 8px rgba(124, 156, 184, 0.4);`;
+
+                            if (state.showChordTones && isChordTone) {
+                                scaleStyle = `background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);`;
+                            }
+                            if (state.showTriads && isInTriadShape) {
+                                scaleStyle = `background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);`;
+                            }
+                            
+                            // Build content
+                            if (state.showNotes && state.showIntervals) {
+                                const interval = getIntervalName(state.backingRoot, note, state.backingScale);
+                                content = `<div class="note with-interval" style="${scaleStyle}">
+                                    <span class="note-name">${note}</span>
+                                    <span class="interval-name">${interval}</span>
+                                </div>`;
+                            } else if (state.showNotes) {
+                                content = `<div class="note" style="${scaleStyle}">${note}</div>`;
+                            } else if (state.showIntervals) {
+                                const interval = getIntervalName(state.backingRoot, note, state.backingScale);
+                                content = `<div class="note" style="${scaleStyle}">${interval}</div>`;
+                            } else {
+                                content = `<div class="note" style="${scaleStyle}"></div>`;
+                            }
                         } else if (!inScale && state.showAllNotes) {
                             // Outside scale - only show if toggle is on
                             content = `<div class="note dimmed">${state.showNotes ? note : ''}</div>`;
@@ -1897,7 +1998,7 @@
                     
                     let marker = '';
                     if (str === 5) {
-                        if ([3, 5, 7, 9].includes(fret)) marker = '<div class="fret-marker"></div>';
+                        if ([3, 5, 7, 9, 15, 17].includes(fret)) marker = '<div class="fret-marker"></div>';
                         else if (fret === 12) marker = '<div class="fret-marker double"></div>';
                     }
                     
@@ -2586,6 +2687,14 @@
             renderInfoPanel();
         }
 
+        // Fret toggle
+        document.getElementById('fretToggle').onclick = () => {
+            state.maxFret = state.maxFret === 17 ? 12 : 17;
+            document.getElementById('fretToggle').textContent = 
+                state.maxFret === 12 ? 'Toon meer frets (17)' : 'Toon minder frets (12)';
+            renderAll();
+        };
+        
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.target.tagName === 'INPUT') return;
