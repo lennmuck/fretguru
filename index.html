@@ -1280,57 +1280,96 @@
                 D: { name: 'D-vorm', frets: [2, 3, 2, 0, null, null], rootString: 3, rootFretInShape: 0, description: 'Compact shape op hoge snaren' }
             },
             minor: {
-                C: { name: 'Cm-vorm', frets: [0, 1, 0, 1, 3, null], rootString: 4, rootFretInShape: 3, description: 'Mineur C-vorm' },
-                A: { name: 'Am-vorm', frets: [0, 1, 2, 2, 0, null], rootString: 4, rootFretInShape: 0, description: 'Barré mineur op A-snaar' },
-                G: { name: 'Gm-vorm', frets: [3, 0, 0, 0, 1, 3], rootString: 5, rootFretInShape: 3, description: 'Mineur G-vorm' },
-                E: { name: 'Em-vorm', frets: [0, 0, 0, 2, 2, 0], rootString: 5, rootFretInShape: 0, description: 'Meest gebruikte mineur barré' },
-                D: { name: 'Dm-vorm', frets: [1, 3, 2, 0, null, null], rootString: 3, rootFretInShape: 0, description: 'Compact mineur shape' }
+                C: {
+                    name: 'Cm-vorm',
+                    // Aangepast: open E verwijderd (clasht met Eb)
+                    frets: [null, 1, 0, 1, 3, null],
+                    rootString: 4,
+                    rootFretInShape: 3,
+                    description: 'Mineur C-vorm'
+                },
+                A: {
+                    name: 'Am-vorm',
+                    // Open Am: correct
+                    frets: [0, 1, 2, 2, 0, null],
+                    rootString: 4,
+                    rootFretInShape: 0,
+                    description: 'Barré mineur op A-snaar'
+                },
+                G: {
+                    name: 'Gm-vorm',
+                    // Aangepast: open B verwijderd (clasht met Bb)
+                    frets: [3, null, 0, 0, 1, 3],
+                    rootString: 5,
+                    rootFretInShape: 3,
+                    description: 'Mineur G-vorm'
+                },
+                E: {
+                    name: 'Em-vorm',
+                    // Open Em: correct
+                    frets: [0, 0, 0, 2, 2, 0],
+                    rootString: 5,
+                    rootFretInShape: 0,
+                    description: 'Meest gebruikte mineur barré'
+                },
+                D: {
+                    name: 'Dm-vorm',
+                    // Open Dm: correct
+                    frets: [1, 3, 2, 0, null, null],
+                    rootString: 3,
+                    rootFretInShape: 0,
+                    description: 'Compact mineur shape'
+                }
             }
         };
 
         const TRIAD_SHAPES = {
             major: {
+                // Strings E-B-G (indices 0-1-2)
                 strings123: [
-                    { name: 'Root', frets: [0, 0, 1], rootIndex: 2 },
-                    { name: '1st inv', frets: [0, 1, 2], rootIndex: 0 },
-                    { name: '2nd inv', frets: [1, 1, 2], rootIndex: 1 }
+                    { name: 'Root', frets: [0, 1, 0] },      // E-C-G = C maj root pos (C in bass via B string)
+                    { name: '1st inv', frets: [1, 0, 0] },   // E-B-G = E in bass
+                    { name: '2nd inv', frets: [0, 0, 2] }    // G in bass
                 ],
+                // Strings B-G-D (indices 1-2-3)
                 strings234: [
-                    { name: 'Root', frets: [1, 0, 0], rootIndex: 2 },
-                    { name: '1st inv', frets: [1, 2, 1], rootIndex: 0 },
-                    { name: '2nd inv', frets: [2, 2, 1], rootIndex: 1 }
+                    { name: 'Root', frets: [0, 0, 2] },
+                    { name: '1st inv', frets: [1, 0, 0] },
+                    { name: '2nd inv', frets: [0, 2, 1] }
                 ],
+                // Strings G-D-A (indices 2-3-4)
                 strings345: [
-                    { name: 'Root', frets: [0, 0, 2], rootIndex: 2 },
-                    { name: '1st inv', frets: [0, 1, 2], rootIndex: 0 },
-                    { name: '2nd inv', frets: [0, 2, 2], rootIndex: 1 }
+                    { name: 'Root', frets: [0, 2, 2] },
+                    { name: '1st inv', frets: [0, 0, 1] },
+                    { name: '2nd inv', frets: [2, 1, 0] }
                 ],
+                // Strings D-A-E (indices 3-4-5)
                 strings456: [
-                    { name: 'Root', frets: [0, 0, 2], rootIndex: 2 },
-                    { name: '1st inv', frets: [0, 1, 2], rootIndex: 0 },
-                    { name: '2nd inv', frets: [0, 2, 2], rootIndex: 1 }
+                    { name: 'Root', frets: [0, 2, 2] },
+                    { name: '1st inv', frets: [0, 0, 1] },
+                    { name: '2nd inv', frets: [2, 1, 0] }
                 ]
             },
             minor: {
                 strings123: [
-                    { name: 'Root', frets: [0, 0, 0], rootIndex: 2 },
-                    { name: '1st inv', frets: [1, 1, 2], rootIndex: 0 },
-                    { name: '2nd inv', frets: [0, 1, 2], rootIndex: 1 }
+                    { name: 'Root', frets: [0, 0, 0] },
+                    { name: '1st inv', frets: [0, 1, 0] },
+                    { name: '2nd inv', frets: [0, 0, 1] }
                 ],
                 strings234: [
-                    { name: 'Root', frets: [0, 0, 0], rootIndex: 2 },
-                    { name: '1st inv', frets: [2, 2, 1], rootIndex: 0 },
-                    { name: '2nd inv', frets: [1, 2, 1], rootIndex: 1 }
+                    { name: 'Root', frets: [0, 0, 1] },
+                    { name: '1st inv', frets: [1, 0, 0] },
+                    { name: '2nd inv', frets: [0, 2, 0] }
                 ],
                 strings345: [
-                    { name: 'Root', frets: [0, 0, 1], rootIndex: 2 },
-                    { name: '1st inv', frets: [1, 1, 2], rootIndex: 0 },
-                    { name: '2nd inv', frets: [0, 1, 2], rootIndex: 1 }
+                    { name: 'Root', frets: [0, 2, 1] },
+                    { name: '1st inv', frets: [0, 0, 0] },
+                    { name: '2nd inv', frets: [2, 0, 0] }
                 ],
                 strings456: [
-                    { name: 'Root', frets: [0, 0, 1], rootIndex: 2 },
-                    { name: '1st inv', frets: [1, 1, 2], rootIndex: 0 },
-                    { name: '2nd inv', frets: [0, 1, 2], rootIndex: 1 }
+                    { name: 'Root', frets: [0, 2, 1] },
+                    { name: '1st inv', frets: [0, 0, 0] },
+                    { name: '2nd inv', frets: [2, 0, 0] }
                 ]
             }
         };
@@ -1459,6 +1498,7 @@
             const isMinor = scaleType.toLowerCase().includes('minor') || scaleType === 'minorPentatonic';
             const chordType = isMinor ? 'minor' : 'major';
             const shapes = TRIAD_SHAPES[chordType];
+            const triadNotes = getTriadNotes(rootNote, scaleType);
             const allPositions = [];
             
             const stringGroups = [
@@ -1468,44 +1508,50 @@
                 { key: 'strings456', strings: [3, 4, 5] }
             ];
             
-            stringGroups.forEach(group => {
-                const inversions = shapes[group.key];
-                if (!inversions || !Array.isArray(inversions)) return;
-                
-                for (let baseFret = 0; baseFret <= 12; baseFret++) {
-                    inversions.forEach(inv => {
-                        if (!inv.frets || !Array.isArray(inv.frets)) return;
-                        
-                        const positions = [];
-                        let allValid = true;
-                        let hasRootNote = false;
-                        
-                        for (let i = 0; i < group.strings.length; i++) {
-                            const stringIdx = group.strings[i];
-                            const fretOffset = inv.frets[i];
-                            const fret = baseFret + fretOffset;
-                            
-                            if (fret < 0 || fret > 12) {
-                                allValid = false;
-                                break;
+            // Zoek alle posities waar de triad noten voorkomen op 3 aangrenzende snaren
+            for (let baseFret = 0; baseFret <= 17; baseFret++) {
+                stringGroups.forEach(group => {
+                    const positions = group.strings.map(str => ({
+                        string: str,
+                        fret: baseFret,
+                        note: getNoteAtFret(str, baseFret)
+                    }));
+                    
+                    // Check +/- 2 frets rond baseFret voor elke snaar
+                    for (let offset0 = 0; offset0 <= 3; offset0++) {
+                        for (let offset1 = 0; offset1 <= 3; offset1++) {
+                            for (let offset2 = 0; offset2 <= 3; offset2++) {
+                                const fret0 = baseFret + offset0;
+                                const fret1 = baseFret + offset1;
+                                const fret2 = baseFret + offset2;
+                                
+                                if (fret0 > 17 || fret1 > 17 || fret2 > 17) continue;
+                                
+                                const note0 = getNoteAtFret(group.strings[0], fret0);
+                                const note1 = getNoteAtFret(group.strings[1], fret1);
+                                const note2 = getNoteAtFret(group.strings[2], fret2);
+                                
+                                const notes = [note0, note1, note2];
+                                
+                                // Check of alle 3 de noten in de triad zitten
+                                // EN of alle 3 triad noten vertegenwoordigd zijn
+                                const allInTriad = notes.every(n => triadNotes.includes(n));
+                                const hasAllTriadNotes = triadNotes.every(t => notes.includes(t));
+                                
+                                if (allInTriad && hasAllTriadNotes) {
+                                    allPositions.push(
+                                        { string: group.strings[0], fret: fret0 },
+                                        { string: group.strings[1], fret: fret1 },
+                                        { string: group.strings[2], fret: fret2 }
+                                    );
+                                }
                             }
-                            
-                            const note = getNoteAtFret(stringIdx, fret);
-                            if (note === rootNote) hasRootNote = true;
-                            positions.push({ string: stringIdx, fret: fret, note: note });
                         }
-                        
-                        if (allValid && hasRootNote) {
-                            const triadNotes = getTriadNotes(rootNote, scaleType);
-                            const allNotesInTriad = positions.every(p => triadNotes.includes(p.note));
-                            if (allNotesInTriad) {
-                                positions.forEach(p => allPositions.push({ string: p.string, fret: p.fret }));
-                            }
-                        }
-                    });
-                }
-            });
+                    }
+                });
+            }
             
+            // Verwijder duplicaten
             const unique = [];
             const seen = new Set();
             allPositions.forEach(p => {
@@ -1525,8 +1571,20 @@
             const rootIndex = getNoteIndex(rootNote);
             const scale = SCALES[scaleType];
             
+            // Map scale degrees naar correcte semitoon-intervallen
+            // Dit werkt onafhankelijk van hoeveel noten de toonladder heeft
+            const degreeToSemitone = {
+                1: 0,   // Grondtoon
+                2: 2,   // Grote secunde
+                3: scale.intervals.includes(3) ? 3 : 4,   // Kleine of grote terts
+                4: 5,   // Kwart
+                5: 7,   // Kwint
+                6: scale.intervals.includes(8) ? 8 : 9,   // Kleine of grote sext
+                7: scale.intervals.includes(10) ? 10 : 11  // Kleine of grote septiem
+            };
+            
             return harmonized.map(chord => {
-                const interval = scale.intervals[chord.degree - 1] || 0;
+                const interval = degreeToSemitone[chord.degree] || 0;
                 const chordRoot = getNoteName(rootIndex + interval);
                 const suffix = chord.type === 'major' ? '' : chord.type === 'minor' ? 'm' : '°';
                 return { name: chordRoot + suffix, numeral: chord.numeral };
