@@ -602,19 +602,6 @@
         .chord-color-4 { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
         .chord-color-5 { background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); }
 
-        /* Multi-color notes (pie chart style) */
-        .note.multi-color {
-            background: conic-gradient(
-                var(--color-0, transparent) 0deg var(--angle-0, 0deg),
-                var(--color-1, transparent) var(--angle-0, 0deg) var(--angle-1, 0deg),
-                var(--color-2, transparent) var(--angle-1, 0deg) var(--angle-2, 0deg),
-                var(--color-3, transparent) var(--angle-2, 0deg) var(--angle-3, 0deg),
-                var(--color-4, transparent) var(--angle-3, 0deg) var(--angle-4, 0deg),
-                var(--color-5, transparent) var(--angle-4, 0deg) 360deg
-            );
-            box-shadow: 0 0 12px rgba(255,255,255,0.3);
-        }
-
         /* Fretboard */
         .fretboard-container {
             background: rgba(0,0,0,0.3);
@@ -622,6 +609,7 @@
             padding: 30px;
             margin-bottom: 30px;
             overflow-x: auto;
+            position: relative;
         }
 
         .fretboard {
@@ -758,6 +746,33 @@
             color: rgba(11, 0, 36, 0.9);
         }
 
+        .note.found {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+            animation: noteFound 0.3s ease-out;
+        }
+
+        .note.wrong {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+
+        .note.clickable {
+            cursor: pointer;
+            background: rgba(255,255,255,0.1);
+            border: 2px dashed rgba(255,255,255,0.3);
+        }
+
+        .note.clickable:hover {
+            background: rgba(91, 141, 191, 0.3);
+            border-color: #5b8dbf;
+        }
+
+        @keyframes noteFound {
+            0% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
         /* CAGED Shape Colors */
         .note.caged-c { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
         .note.caged-a { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); box-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }
@@ -837,6 +852,112 @@
             font-size: 1rem;
             font-weight: 600;
         }
+
+        /* Note Finder Styles */
+        .note-finder-header {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .note-finder-target {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .note-finder-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+        }
+
+        .note-finder-stat {
+            text-align: center;
+        }
+
+        .note-finder-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #5b8dbf;
+        }
+
+        .note-finder-stat-label {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .shapes-unlocked {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .shape-indicator {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            border: 2px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .shape-indicator.unlocked {
+            border-color: transparent;
+            color: #fff;
+            animation: shapeUnlock 0.5s ease-out;
+        }
+
+        .shape-indicator.shape-green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        .shape-indicator.shape-blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+        .shape-indicator.shape-red { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+        .shape-indicator.shape-purple { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
+
+        @keyframes shapeUnlock {
+            0% { transform: scale(1.5); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* SVG Overlay for shape lines */
+        .shape-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+.shape-line {
+            stroke-width: 4;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            opacity: 0.8;
+        }
+
+        .shape-line.green { stroke: #10b981; filter: drop-shadow(0 0 4px #10b981); }
+        .shape-line.blue { stroke: #3b82f6; filter: drop-shadow(0 0 4px #3b82f6); }
+        .shape-line.red { stroke: #ef4444; filter: drop-shadow(0 0 4px #ef4444); }
+        .shape-line.purple { stroke: #8b5cf6; filter: drop-shadow(0 0 4px #8b5cf6); }
+
+        .shape-line.visible {
+            opacity: 0.8;
+        }
+
 
         /* Info Panel */
         .info-panel {
@@ -1014,6 +1135,73 @@
             z-index: 5;
         }
 
+        /* Victory Screen */
+        .victory-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .victory-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .victory-content {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            border: 2px solid rgba(255,255,255,0.1);
+            max-width: 400px;
+        }
+
+        .victory-emoji {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .victory-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .victory-stats {
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        .victory-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #5b8dbf 0%, #4a75a0 100%);
+            border: none;
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 5px;
+        }
+
+        .victory-btn:hover {
+            transform: scale(1.05);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .control-panel {
@@ -1036,6 +1224,35 @@
         .hidden {
             display: none !important;
         }
+
+        /* Fix SVG overlay positioning */
+        .fretboard-container {
+            position: relative;
+        }
+
+        .shape-overlay {
+            position: absolute;
+            top: 30px; /* Account for padding */
+            left: 30px;
+            right: 30px;
+            bottom: 30px;
+            pointer-events: none;
+            z-index: 5;
+            overflow: visible;
+        }
+
+        .shape-line {
+            stroke-width: 4;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: drop-shadow(0 0 3px currentColor);
+        }
+
+        .shape-line.green { stroke: #10b981; }
+        .shape-line.blue { stroke: #3b82f6; }
+        .shape-line.red { stroke: #ef4444; }
+        .shape-line.purple { stroke: #8b5cf6; }
     </style>
 </head>
 <body>
@@ -1056,6 +1273,10 @@
             <button class="main-mode-btn" data-main-mode="backing">
                 <span class="icon">🎵</span>
                 Backing Track
+            </button>
+            <button class="main-mode-btn" data-main-mode="noteFinder">
+                <span class="icon">🎯</span>
+                Note Finder
             </button>
         </div>
 
@@ -1110,7 +1331,7 @@
                 <p style="font-size: 0.85rem; color: #aaa; line-height: 1.5;">
                     Elk akkoord kun je in 5 vormen spelen.<br>
                     <strong style="color: #fff;">Volgorde over de hals:</strong><br>
-                    <span style="color: #83704d;">C</span> → 
+                    <span style="color: #ef4444;">C</span> → 
                     <span style="color: #f59e0b;">A</span> → 
                     <span style="color: #10b981;">G</span> → 
                     <span style="color: #3b82f6;">E</span> → 
@@ -1134,20 +1355,91 @@
 
             <div class="panel" style="grid-column: span 2;">
                 <h3><span class="icon">🎸</span> Akkoorden in je backing track</h3>
-                <div class="chord-input-container" id="chordInputContainer">
-                    <!-- Chords will be added here -->
-                </div>
+                <div class="chord-input-container" id="chordInputContainer"></div>
                 <button class="add-chord-btn" id="addChordBtn">+ Akkoord toevoegen</button>
                 <div id="chordPickerContainer"></div>
-                
-                <div class="backing-legend" id="backingLegend">
-                    <!-- Legend will be generated -->
-                </div>
+                <div class="backing-legend" id="backingLegend"></div>
             </div>
 
             <div class="panel">
                 <h3><span class="icon">👁️</span> Weergave</h3>
                 <div class="toggles" id="backingToggles"></div>
+            </div>
+        </div>
+
+        <!-- NOTE FINDER MODE CONTROLS -->
+        <div class="control-panel hidden" id="noteFinderControls">
+            <div class="panel">
+                <h3><span class="icon">⚙️</span> Instellingen</h3>
+                <div class="toggle-item">
+                    <span class="toggle-label">Aantal frets</span>
+                    <div class="chord-type-selector" style="margin: 0;">
+                        <button class="chord-type-btn active" data-nf-frets="12">12</button>
+                        <button class="chord-type-btn" data-nf-frets="17">17</button>
+                    </div>
+                </div>
+                <div class="toggle-item" style="margin-top: 12px;">
+                    <span class="toggle-label">Noten</span>
+                    <div class="chord-type-selector" style="margin: 0;">
+                        <button class="chord-type-btn active" data-nf-notes="7">7 (naturel)</button>
+                        <button class="chord-type-btn" data-nf-notes="12">12 (alle)</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3><span class="icon">🎵</span> Kies Noot (optioneel)</h3>
+                <div class="root-notes" id="noteFinderNoteSelect">
+                    <button class="root-note-btn active" data-nf-note="random">🎲</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3><span class="icon">🎮</span> Game</h3>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="mode-btn" id="startNoteFinderBtn" style="flex: 1; text-align: center;">
+                        ▶️ Start Nieuwe Ronde
+                    </button>
+                    <button class="mode-btn" id="skipNoteBtn" style="flex: 1; text-align: center;" disabled>
+                        ⏭️ Volgende Noot
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3><span class="icon">💡</span> Hoe het werkt</h3>
+                <p style="font-size: 0.85rem; color: #aaa; line-height: 1.5;">
+                    1. Klik op <strong style="color: #fff;">Start</strong> of kies een specifieke noot<br>
+                    2. Vind alle posities van de getoonde noot<br>
+                    3. Ontgrendel <strong style="color: #10b981;">geometrische patronen</strong><br>
+                    4. Leer de fretboard als een visueel systeem!
+                </p>
+            </div>
+        </div>
+
+        <!-- Note Finder Header (shows during game) -->
+        <div class="note-finder-header hidden" id="noteFinderHeader">
+            <div>Vind alle:</div>
+            <div class="note-finder-target" id="noteFinderTarget">A</div>
+            <div class="note-finder-stats">
+                <div class="note-finder-stat">
+                    <div class="note-finder-stat-value" id="nfFound">0</div>
+                    <div class="note-finder-stat-label">Gevonden</div>
+                </div>
+                <div class="note-finder-stat">
+                    <div class="note-finder-stat-value" id="nfTotal">0</div>
+                    <div class="note-finder-stat-label">Totaal</div>
+                </div>
+                <div class="note-finder-stat">
+                    <div class="note-finder-stat-value" id="nfMistakes">0</div>
+                    <div class="note-finder-stat-label">Fouten</div>
+                </div>
+            </div>
+            <div class="shapes-unlocked" id="shapesUnlocked">
+                <div class="shape-indicator" data-shape="0" title="Groene driehoek">△</div>
+                <div class="shape-indicator" data-shape="1" title="Blauwe driehoek">△</div>
+                <div class="shape-indicator" data-shape="2" title="Rode driehoek">△</div>
+                <div class="shape-indicator" data-shape="3" title="Paarse driehoek">△</div>
             </div>
         </div>
 
@@ -1160,7 +1452,7 @@
         </div>
 
         <!-- Fretboard settings -->
-        <div style="display: flex; justify-content: flex-end; margin-bottom: 10px; gap: 10px;">
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 10px; gap: 10px;" id="fretToggleContainer">
             <button id="fretToggle" style="padding: 6px 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #888; border-radius: 6px; cursor: pointer; font-size: 0.8rem;">
                 Toon minder frets (12)
             </button>
@@ -1168,6 +1460,7 @@
 
         <!-- Fretboard -->
         <div class="fretboard-container">
+            <svg class="shape-overlay" id="shapeOverlay"></svg>
             <div class="fretboard" id="fretboard"></div>
             <div class="legend" id="legend"></div>
         </div>
@@ -1178,6 +1471,19 @@
         </div>
     </div>
 
+    <!-- Victory Overlay -->
+    <div class="victory-overlay" id="victoryOverlay">
+        <div class="victory-content">
+            <div class="victory-emoji">🎉</div>
+            <div class="victory-title">Geweldig!</div>
+            <div class="victory-stats" id="victoryStats">
+                Je hebt alle noten gevonden!
+            </div>
+            <button class="victory-btn" id="victoryNextBtn">Volgende Noot →</button>
+            <button class="victory-btn" id="victoryViewBtn" style="background: rgba(255,255,255,0.1);">Bekijk Resultaat</button>
+            <button class="victory-btn" id="victoryRestartBtn" style="background: rgba(255,255,255,0.1);">Opnieuw</button>
+        </div>
+    </div>
     <div class="audio-notice" id="audioNotice">🔊 Noot afgespeeld</div>
 
     <script>
@@ -1187,23 +1493,19 @@
         
         const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
         const NOTES_FLAT = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
-        const NOTES_SHARP = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
+        const NOTES_SHARP = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const NATURAL_NOTES = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
 
-        // Deze root notes gebruiken flats in hun majeur/mineur toonladders
-        // F, Bb(=A#), Eb(=D#), Ab(=G#), Db(=C#), Gb(=F#)
-        // We matchen op de index omdat de UI sharps toont
-        const FLAT_KEY_INDICES = [5, 10, 3, 8, 1, 6]; // F, A#, D#, G#, C#, F#
-        const SHARP_KEY_INDICES = [7, 2, 9, 4, 11]; // G, D, A, E, B
+        const FLAT_KEY_INDICES = [5, 10, 3, 8, 1, 6];
+        const SHARP_KEY_INDICES = [7, 2, 9, 4, 11];
 
         function shouldUseFlats(rootNote) {
             const rootIndex = getNoteIndex(rootNote);
-            // Gebruik sharps alleen voor G, D, A, E, B (en hun relatieve mineurs)
             return !SHARP_KEY_INDICES.includes(rootIndex);
         }
         
         function getNoteName(index, rootNote = null) {
             const normalizedIndex = ((index % 12) + 12) % 12;
-            
             if (rootNote && !shouldUseFlats(rootNote)) {
                 return NOTES_SHARP[normalizedIndex];
             }
@@ -1211,13 +1513,12 @@
         }
         
         function getNoteIndex(noteName) {
-            // Check beide arrays
             let index = NOTES.indexOf(noteName);
-            if (index === -1) {
-                index = NOTES_FLAT.indexOf(noteName);
-            }
+            if (index === -1) index = NOTES_FLAT.indexOf(noteName);
+            if (index === -1) index = NOTES_SHARP.indexOf(noteName);
             return index;
         }
+
         const TUNING = ['E', 'B', 'G', 'D', 'A', 'E'];
 
         // Chord colors for backing track mode
@@ -1228,6 +1529,60 @@
             { bg: 'linear-gradient(135deg, #5b8dbf 0%, #4a75a0 100%)', hex: '#5b8dbf', name: 'Staal' },
             { bg: 'linear-gradient(135deg, #c9657a 0%, #a85265 100%)', hex: '#c9657a', name: 'Bes' },
             { bg: 'linear-gradient(135deg, #6b9b6e 0%, #588059 100%)', hex: '#6b9b6e', name: 'Bos' }
+        ];
+
+        // Octave shape patterns - CORRECTE gitaar octaaf relaties
+        // Tuning: E(0)-B(1)-G(2)-D(3)-A(4)-E(5) (string index)
+        // Standaard octaaf patronen op gitaar:
+        const OCTAVE_SHAPES = [
+            {
+                name: 'Groene Driehoek',
+                color: 'green',
+                // Fretjam Groen: Lage E -> G -> Hoge E
+                pattern: [
+                    { string: 5, fretOffset: 0 },  // Lage E
+                    { string: 2, fretOffset: -3 }, // G snaar is altijd 3 frets lager
+                    { string: 0, fretOffset: 0 }   // Hoge E is zelfde fret
+                ],
+                anchorString: 5,
+                minAnchorFret: 3 // Voorkomt dat de G-snaar in de negatieve frets zoekt
+            },
+            {
+                name: 'Blauwe Driehoek',
+                color: 'blue',
+                // Fretjam Blauw: Lage E -> D -> Hoge E
+                pattern: [
+                    { string: 5, fretOffset: 0 },  // Lage E
+                    { string: 3, fretOffset: 2 },  // D snaar is 2 frets hoger
+                    { string: 0, fretOffset: 0 }   // Hoge E is zelfde fret
+                ],
+                anchorString: 5,
+                minAnchorFret: 0
+            },
+            {
+                name: 'Rode Driehoek',
+                color: 'red',
+                // Fretjam Rood: A -> B -> D
+                pattern: [
+                    { string: 4, fretOffset: 0 },   // A snaar als basis
+                    { string: 1, fretOffset: -2 },  // B snaar is 2 frets lager
+                    { string: 3, fretOffset: -5 }   // D snaar is 5 frets lager
+                ],
+                anchorString: 4,
+                minAnchorFret: 5 
+            },
+            {
+                name: 'Paarse Driehoek', 
+                color: 'purple',
+                // Fretjam Paars: A -> G -> B
+                pattern: [
+                    { string: 4, fretOffset: 0 },  // A snaar als basis
+                    { string: 2, fretOffset: 2 },  // G snaar is 2 frets hoger
+                    { string: 1, fretOffset: -2 }  // B snaar is 2 frets lager
+                ],
+                anchorString: 4,
+                minAnchorFret: 2
+            }
         ];
 
         const SCALES = {
@@ -1266,7 +1621,12 @@
             'maj7': [0, 4, 7, 11]
         };
 
-        const CHORD_TYPES = [            { key: 'major', label: 'Majeur', suffix: '' },            { key: 'minor', label: 'Mineur', suffix: 'm' },            { key: '7', label: 'Dominant 7', suffix: '7' },            { key: 'm7', label: 'Mineur 7', suffix: 'm7' }        ];
+        const CHORD_TYPES = [
+            { key: 'major', label: 'Majeur', suffix: '' },
+            { key: 'minor', label: 'Mineur', suffix: 'm' },
+            { key: '7', label: 'Dominant 7', suffix: '7' },
+            { key: 'm7', label: 'Mineur 7', suffix: 'm7' }
+        ];
 
         const HARMONIZED_SCALES = {
             minor: [
@@ -1312,62 +1672,35 @@
                 D: { name: 'D-vorm', frets: [2, 3, 2, 0, null, null], rootString: 3, rootFretInShape: 0, description: 'Compact shape op hoge snaren' }
             },
             minor: {
-                C: {
-                    name: 'Cm-vorm',
-                    // Aangepast: open E verwijderd (clasht met Eb)
-                    frets: [null, 1, 0, 1, 3, null],
-                    rootString: 4,
-                    rootFretInShape: 3,
-                    description: 'Mineur C-vorm'
-                },
-                A: {
-                    name: 'Am-vorm',
-                    // Open Am: correct
-                    frets: [0, 1, 2, 2, 0, null],
-                    rootString: 4,
-                    rootFretInShape: 0,
-                    description: 'Barré mineur op A-snaar'
-                },
-                G: {
-                    name: 'Gm-vorm',
-                    // Aangepast: open B verwijderd (clasht met Bb)
-                    frets: [3, null, 0, 0, 1, 3],
-                    rootString: 5,
-                    rootFretInShape: 3,
-                    description: 'Mineur G-vorm'
-                },
-                E: {
-                    name: 'Em-vorm',
-                    // Open Em: correct
-                    frets: [0, 0, 0, 2, 2, 0],
-                    rootString: 5,
-                    rootFretInShape: 0,
-                    description: 'Meest gebruikte mineur barré'
-                },
-                D: {
-                    name: 'Dm-vorm',
-                    // Open Dm: correct
-                    frets: [1, 3, 2, 0, null, null],
-                    rootString: 3,
-                    rootFretInShape: 0,
-                    description: 'Compact mineur shape'
-                }
+                C: { name: 'Cm-vorm', frets: [null, 1, 0, 1, 3, null], rootString: 4, rootFretInShape: 3, description: 'Mineur C-vorm' },
+                A: { name: 'Am-vorm', frets: [0, 1, 2, 2, 0, null], rootString: 4, rootFretInShape: 0, description: 'Barré mineur op A-snaar' },
+                G: { name: 'Gm-vorm', frets: [3, null, 0, 0, 1, 3], rootString: 5, rootFretInShape: 3, description: 'Mineur G-vorm' },
+                E: { name: 'Em-vorm', frets: [0, 0, 0, 2, 2, 0], rootString: 5, rootFretInShape: 0, description: 'Meest gebruikte mineur barré' },
+                D: { name: 'Dm-vorm', frets: [1, 3, 2, 0, null, null], rootString: 3, rootFretInShape: 0, description: 'Compact mineur shape' }
             }
         };
 
-        
-
         const CAGED_SEQUENCE = ['E', 'D', 'C', 'A', 'G'];
 
-        const TOGGLE_CONFIG = [            { key: 'showNotes', label: 'Toon nootnamen', help: 'Toont de letter van elke noot.' },            { key: 'showIntervals', label: 'Toon intervallen', help: 'Toont het interval (1, b3, 5, etc.).' },            { key: 'showOnlyRelevant', label: 'Alleen relevante noten', help: 'Verbergt noten buiten de toonladder.' },            { key: 'highlightRoot', label: 'Highlight grondtoon', help: 'Grondtoon extra zichtbaar in rood.' },            { key: 'showChordTones', label: 'Highlight 1-3-5', help: 'Akkoordtonen (1-3-5) in groen.' },            { key: 'showTriads', label: 'Toon triads', help: 'Triad posities in oranje.' }        ];
+        const TOGGLE_CONFIG = [
+            { key: 'showNotes', label: 'Toon nootnamen', help: 'Toont de letter van elke noot.' },
+            { key: 'showIntervals', label: 'Toon intervallen', help: 'Toont het interval (1, b3, 5, etc.).' },
+            { key: 'showOnlyRelevant', label: 'Alleen relevante noten', help: 'Verbergt noten buiten de toonladder.' },
+            { key: 'highlightRoot', label: 'Highlight grondtoon', help: 'Grondtoon extra zichtbaar in rood.' },
+            { key: 'showChordTones', label: 'Highlight 1-3-5', help: 'Akkoordtonen (1-3-5) in groen.' },
+            { key: 'showTriads', label: 'Toon triads', help: 'Triad posities in oranje.' }
+        ];
 
-        const CAGED_TOGGLE_CONFIG = [            { key: 'showNotes', label: 'Toon nootnamen', help: 'Toont de letter van elke noot.' },            { key: 'showAllShapes', label: 'Alle shapes tegelijk', help: 'Toon alle 5 CAGED posities in kleuren.' },            { key: 'showOnlyChordTones', label: 'Alleen akkoordtonen', help: 'Toon alleen 1-3-5 noten.' },            { key: 'highlightRoot', label: 'Highlight grondtoon', help: 'Grondtoon extra zichtbaar.' }        ];
+        const CAGED_TOGGLE_CONFIG = [
+            { key: 'showNotes', label: 'Toon nootnamen', help: 'Toont de letter van elke noot.' },
+            { key: 'showAllShapes', label: 'Alle shapes tegelijk', help: 'Toon alle 5 CAGED posities in kleuren.' },
+            { key: 'showOnlyChordTones', label: 'Alleen akkoordtonen', help: 'Toon alleen 1-3-5 noten.' },
+            { key: 'highlightRoot', label: 'Highlight grondtoon', help: 'Grondtoon extra zichtbaar.' }
+        ];
 
         const BACKING_TOGGLE_CONFIG = [
             { key: 'showNotes', label: 'Toon nootnamen', help: 'Toont de letter van elke noot.' },
             { key: 'showIntervals', label: 'Toon intervallen', help: 'Toont het interval (1, b3, 5, etc.).' },
-            // { key: 'showChordTones', label: 'Highlight 1-3-5', help: 'Akkoordtonen van de toonsoort in groen.' },
-            // { key: 'showTriads', label: 'Toon triads', help: 'Triad posities in oranje.' },
             { key: 'showAllNotes', label: 'Toon alle noten', help: 'Toon ook noten buiten de toonladder (dimmed).' },
             { key: 'showOnlyChordNotes', label: 'Alleen akkoordnoten', help: 'Verberg toonladder noten, toon alleen akkoordnoten.' }
         ];
@@ -1377,7 +1710,7 @@
         // ============================================
         
         const state = {
-            mainMode: 'backing',
+            mainMode: 'scales',
             
             // Scales mode
             rootNote: 'A',
@@ -1392,9 +1725,23 @@
             // Backing track mode
             backingRoot: 'A',
             backingScale: 'minorPentatonic',
-            backingChords: [], // Array of { root: 'A', type: 'minor', name: 'Am' }
+            backingChords: [],
             chordPickerOpen: false,
             chordPickerRoot: 'A',
+            
+            // Note Finder mode
+            noteFinder: {
+                active: false,
+                maxFret: 12,
+                noteCount: 7,
+                selectedNote: 'random', // 'random' of specifieke noot
+                targetNote: null,
+                allPositions: [],
+                foundPositions: [],
+                wrongPositions: [],
+                unlockedShapes: [],
+                mistakes: 0
+            },
             
             // Shared toggles
             showNotes: true,
@@ -1409,7 +1756,7 @@
             showOnlyChordTones: true,
             
             // Backing toggles
-            showScaleNotes: false,
+            showAllNotes: false,
             showOnlyChordNotes: false,
             
             // Quiz state
@@ -1420,8 +1767,7 @@
             answered: false,
 
             // Fretboard settings
-            maxFret: 17,
-
+            maxFret: 17
         };
 
         // ============================================
@@ -1433,12 +1779,10 @@
             return getNoteName(openNoteIndex + fret, rootNote);
         }
 
-        // Vergelijk noten op basis van pitch, niet naam
         function isSameNote(note1, note2) {
             return getNoteIndex(note1) === getNoteIndex(note2);
         }
         
-        // Check of een noot in een array zit (pitch-based)
         function noteArrayIncludes(noteArray, note) {
             const noteIdx = getNoteIndex(note);
             return noteArray.some(n => getNoteIndex(n) === noteIdx);
@@ -1464,6 +1808,7 @@
         function isNoteInScale(note, rootNote, scaleType) {
             return noteArrayIncludes(getScaleNotes(rootNote, scaleType), note);
         }
+
         function isRootNote(note, rootNote) {
             return isSameNote(note, rootNote);
         }
@@ -1486,14 +1831,12 @@
             const allPositions = [];
             
             const stringGroups = [
-                { strings: [0, 1, 2] },  // E, B, G
-                { strings: [1, 2, 3] },  // B, G, D
-                { strings: [2, 3, 4] },  // G, D, A
-                { strings: [3, 4, 5] }   // D, A, E
+                { strings: [0, 1, 2] },
+                { strings: [1, 2, 3] },
+                { strings: [2, 3, 4] },
+                { strings: [3, 4, 5] }
             ];
             
-            // Zoek alle posities waar complete triads voorkomen op 3 aangrenzende snaren
-            // Beperk tot speelbare spreiding (max 4 frets verschil)
             for (let baseFret = 0; baseFret <= state.maxFret - 3; baseFret++) {
                 stringGroups.forEach(group => {
                     for (let offset0 = 0; offset0 <= 4; offset0++) {
@@ -1511,8 +1854,6 @@
                                 
                                 const notesPlayed = [note0, note1, note2];
                                 
-                                // Check: alle gespeelde noten moeten in de triad zitten
-                                // EN alle 3 triad noten moeten aanwezig zijn
                                 const allInTriad = notesPlayed.every(n => noteArrayIncludes(triadNotes, n));
                                 const hasAllTriadNotes = triadNotes.every(t => noteArrayIncludes(notesPlayed, t));
                                 
@@ -1529,7 +1870,6 @@
                 });
             }
             
-            // Verwijder duplicaten
             const unique = [];
             const seen = new Set();
             allPositions.forEach(p => {
@@ -1549,16 +1889,12 @@
             const rootIndex = getNoteIndex(rootNote);
             const scale = SCALES[scaleType];
             
-            // Map scale degrees naar correcte semitoon-intervallen
-            // Dit werkt onafhankelijk van hoeveel noten de toonladder heeft
             const degreeToSemitone = {
-                1: 0,   // Grondtoon
-                2: 2,   // Grote secunde
-                3: scale.intervals.includes(3) ? 3 : 4,   // Kleine of grote terts
-                4: 5,   // Kwart
-                5: 7,   // Kwint
-                6: scale.intervals.includes(8) ? 8 : 9,   // Kleine of grote sext
-                7: scale.intervals.includes(10) ? 10 : 11  // Kleine of grote septiem
+                1: 0, 2: 2,
+                3: scale.intervals.includes(3) ? 3 : 4,
+                4: 5, 5: 7,
+                6: scale.intervals.includes(8) ? 8 : 9,
+                7: scale.intervals.includes(10) ? 10 : 11
             };
             
             return harmonized.map(chord => {
@@ -1576,57 +1912,35 @@
             const lowEIndex = getNoteIndex('E');
             let rootFretOnLowE = (rootIndex - lowEIndex + 12) % 12;
             
-            // Box definities verschillen per toonladder type!
-            // Minor Pentatonic: standaard CAGED boxes
-            // Major Pentatonic: verschoven (box 1 major = box 2 minor, etc.)
-            
             const minorPentaBoxes = [
-                { start: 0, end: 3 },    // Box 1 (Em shape)
-                { start: 3, end: 5 },    // Box 2 (Dm shape)
-                { start: 5, end: 8 },    // Box 3 (Cm shape)
-                { start: 7, end: 10 },   // Box 4 (Am shape)
-                { start: 10, end: 12 }   // Box 5 (Gm shape)
+                { start: 0, end: 3 }, { start: 3, end: 5 },
+                { start: 5, end: 8 }, { start: 7, end: 10 },
+                { start: 10, end: 12 }
             ];
             
-            // Major Pentatonic boxes zijn 3 posities verschoven
-            // (relatieve minor is 3 halve tonen lager)
             const majorPentaBoxes = [
-                { start: 0, end: 2 },    // Box 1 (G shape) 
-                { start: 2, end: 5 },    // Box 2 (E shape)
-                { start: 4, end: 7 },    // Box 3 (D shape)
-                { start: 7, end: 9 },    // Box 4 (C shape)
-                { start: 9, end: 12 }    // Box 5 (A shape)
+                { start: 0, end: 2 }, { start: 2, end: 5 },
+                { start: 4, end: 7 }, { start: 7, end: 9 },
+                { start: 9, end: 12 }
             ];
             
-            // Volledige toonladders (7 noten) - bredere boxes
             const diatonicBoxes = [
-                { start: 0, end: 3 },
-                { start: 2, end: 5 },
-                { start: 4, end: 7 },
-                { start: 6, end: 9 },
+                { start: 0, end: 3 }, { start: 2, end: 5 },
+                { start: 4, end: 7 }, { start: 6, end: 9 },
                 { start: 9, end: 12 }
             ];
             
             let boxDefs;
-            if (scaleType === 'minorPentatonic') {
-                boxDefs = minorPentaBoxes;
-            } else if (scaleType === 'majorPentatonic') {
-                boxDefs = majorPentaBoxes;
-            } else {
-                boxDefs = diatonicBoxes;
-            }
+            if (scaleType === 'minorPentatonic') boxDefs = minorPentaBoxes;
+            else if (scaleType === 'majorPentatonic') boxDefs = majorPentaBoxes;
+            else boxDefs = diatonicBoxes;
             
             const box = boxDefs[boxIndex];
             const boxStart = rootFretOnLowE + box.start;
             const boxEnd = rootFretOnLowE + box.end;
             
-            // Check primary position
             if (fret >= boxStart && fret <= boxEnd) return true;
-            
-            // Check octave repeat (12 frets higher)
             if (fret >= boxStart + 12 && fret <= boxEnd + 12) return true;
-            
-            // Check lower octave wrap-around
             if (boxStart >= 12 && fret >= boxStart - 12 && fret <= boxEnd - 12) return true;
             if (fret >= 0 && fret <= (boxEnd % 12) && boxEnd > 12) return true;
             
@@ -1677,7 +1991,6 @@
                     if (actualFret < 0 || actualFret > 12) continue;
                     
                     const note = getNoteAtFret(stringIdx, actualFret, rootNote);
-
                     notes.push({
                         string: stringIdx,
                         fret: actualFret,
@@ -1701,7 +2014,6 @@
         }
 
         function getNoteChordMembership(note) {
-            // Returns array of chord indices that contain this note
             const membership = [];
             state.backingChords.forEach((chord, index) => {
                 const chordNotes = getChordNotesForBacking(chord);
@@ -1712,36 +2024,8 @@
             return membership;
         }
 
-        function parseChordName(name) {
-            // Parse chord name like "Am", "C", "F#m7" into { root, type }
-            const match = name.match(/^([A-G][#b]?)(m7?|maj7|7|dim|aug)?$/i);
-            if (!match) return null;
-            
-            let root = match[1].toUpperCase();
-            if (root.length > 1) {
-                root = root[0] + root[1].toLowerCase();
-                // Convert flats to sharps
-                if (root.endsWith('b')) {
-                    const flatToSharp = { 'Db': 'C#', 'Eb': 'D#', 'Gb': 'F#', 'Ab': 'G#', 'Bb': 'A#' };
-                    root = flatToSharp[root] || root;
-                }
-            }
-            
-            if (!NOTES.includes(root)) return null;
-            
-            const suffix = match[2] || '';
-            let type = 'major';
-            if (suffix === 'm') type = 'minor';
-            else if (suffix === 'm7') type = 'm7';
-            else if (suffix === '7') type = '7';
-            else if (suffix === 'maj7') type = 'maj7';
-            else if (suffix === 'dim') type = 'dim';
-            
-            return { root, type, name: root + suffix };
-        }
-
         function addChord(root, type) {
-            if (state.backingChords.length >= 6) return; // Max 6 chords
+            if (state.backingChords.length >= 6) return;
             
             const suffix = type === 'major' ? '' : type === 'minor' ? 'm' : type;
             state.backingChords.push({
@@ -1755,6 +2039,307 @@
 
         function removeChord(index) {
             state.backingChords.splice(index, 1);
+            renderAll();
+        }
+
+        // ============================================
+        // NOTE FINDER FUNCTIONS
+        // ============================================
+
+        function getAllPositionsForNote(targetNote, maxFret) {
+            const positions = [];
+            for (let str = 0; str < 6; str++) {
+                for (let fret = 0; fret <= maxFret; fret++) {
+                    const note = getNoteAtFret(str, fret);
+                    if (isSameNote(note, targetNote)) {
+                        positions.push({ string: str, fret: fret });
+                    }
+                }
+            }
+            return positions;
+        }
+
+        function startNoteFinder() {
+            const nf = state.noteFinder;
+            
+            // Kies noot op basis van selectie
+            if (nf.selectedNote === 'random') {
+                const availableNotes = nf.noteCount === 7 ? NATURAL_NOTES : NOTES;
+                nf.targetNote = availableNotes[Math.floor(Math.random() * availableNotes.length)];
+            } else {
+                nf.targetNote = nf.selectedNote;
+            }
+            
+            // Reset state
+            nf.active = true;
+            nf.allPositions = getAllPositionsForNote(nf.targetNote, nf.maxFret);
+            nf.foundPositions = [];
+            nf.wrongPositions = [];
+            nf.unlockedShapes = [];
+            nf.mistakes = 0;
+            
+            // Reset shape indicators
+            document.querySelectorAll('.shape-indicator').forEach(el => {
+                el.classList.remove('unlocked', 'shape-green', 'shape-blue', 'shape-red', 'shape-purple');
+            });
+            
+            // Update UI
+            document.getElementById('noteFinderHeader').classList.remove('hidden');
+            document.getElementById('skipNoteBtn').disabled = false;
+            
+            renderAll();
+            updateNoteFinderStats();
+        }
+
+        function renderNoteFinderNoteSelect() {
+            const container = document.getElementById('noteFinderNoteSelect');
+            if (!container) return;
+            
+            const nf = state.noteFinder;
+            const availableNotes = nf.noteCount === 7 ? NATURAL_NOTES : NOTES;
+            
+            container.innerHTML = `
+                <button class="root-note-btn ${nf.selectedNote === 'random' ? 'active' : ''}" 
+                        data-nf-note="random" title="Willekeurig">🎲</button>
+                ${availableNotes.map(note => `
+                    <button class="root-note-btn ${nf.selectedNote === note ? 'active' : ''}" 
+                            data-nf-note="${note}">${note}</button>
+                `).join('')}
+            `;
+            
+            container.querySelectorAll('.root-note-btn').forEach(btn => {
+                btn.onclick = () => {
+                    nf.selectedNote = btn.dataset.nfNote;
+                    renderNoteFinderNoteSelect();
+                };
+            });
+        }
+
+        function handleNoteFinderClick(string, fret) {
+            const nf = state.noteFinder;
+            if (!nf.active) return;
+            
+            const clickedNote = getNoteAtFret(string, fret);
+            const posKey = `${string}-${fret}`;
+            
+            // Check of al gevonden
+            if (nf.foundPositions.some(p => p.string === string && p.fret === fret)) {
+                return; // Al gevonden, negeer
+            }
+            
+            // Check of al fout geklikt
+            if (nf.wrongPositions.some(p => p.string === string && p.fret === fret)) {
+                return; // Al fout, negeer
+            }
+            
+            if (isSameNote(clickedNote, nf.targetNote)) {
+                // Correct!
+                nf.foundPositions.push({ string, fret });
+                playNote(string, fret);
+                
+                // Check voor unlocked shapes
+                checkForUnlockedShapes();
+                
+                // Check of alles gevonden
+                // if (nf.foundPositions.length === nf.allPositions.length) {
+                    // setTimeout(() => showVictory(), 300);
+                // }
+            } else {
+                // Fout
+                nf.wrongPositions.push({ string, fret });
+                nf.mistakes++;
+            }
+            
+            renderFretboard();
+            updateNoteFinderStats();
+        }
+
+        function checkForUnlockedShapes() {
+            const nf = state.noteFinder;
+            
+            OCTAVE_SHAPES.forEach((shape, shapeIndex) => {
+                if (nf.unlockedShapes.includes(shapeIndex)) return;
+                
+                // Zoek naar alle mogelijke instanties van dit patroon
+                nf.foundPositions.forEach(anchorPos => {
+                    if (anchorPos.string !== shape.anchorString) return;
+                    
+                    // Check minimum anchor fret
+                    if (shape.minAnchorFret && anchorPos.fret < shape.minAnchorFret) return;
+                    
+                    const baseFret = anchorPos.fret;
+                    
+                    // Bereken de verwachte posities voor dit patroon
+                    const expectedPositions = shape.pattern.map(p => ({
+                        string: p.string,
+                        fret: baseFret + p.fretOffset
+                    }));
+                    
+                    // Check of alle posities binnen de fretboard vallen
+                    const allValid = expectedPositions.every(p => 
+                        p.fret >= 0 && p.fret <= nf.maxFret
+                    );
+                    
+                    if (!allValid) return;
+                    
+                    // Check of alle posities gevonden zijn
+                    const allFound = expectedPositions.every(ep =>
+                        nf.foundPositions.some(fp => 
+                            fp.string === ep.string && fp.fret === ep.fret
+                        )
+                    );
+                    
+                    if (allFound && !nf.unlockedShapes.includes(shapeIndex)) {
+                        nf.unlockedShapes.push(shapeIndex);
+                        
+                        // Update indicator
+                        const indicator = document.querySelector(`.shape-indicator[data-shape="${shapeIndex}"]`);
+                        if (indicator) {
+                            indicator.classList.add('unlocked', `shape-${shape.color}`);
+                        }
+                    }
+                });
+            });
+            
+            // Render shape lines na kleine delay voor DOM update
+            setTimeout(() => renderShapeLines(), 100);
+        }
+
+        function renderShapeLines() {
+            const svg = document.getElementById('shapeOverlay');
+            const nf = state.noteFinder;
+            
+            if (!svg) return;
+            svg.innerHTML = '';
+            
+            if (!nf.active || nf.unlockedShapes.length === 0) return;
+            
+            const fretboard = document.getElementById('fretboard');
+            const container = document.querySelector('.fretboard-container');
+            if (!fretboard || !container) return;
+            
+            // Gebruik requestAnimationFrame voor correcte timing
+            requestAnimationFrame(() => {
+                const containerRect = container.getBoundingClientRect();
+                
+                // Maak SVG even groot als container
+                svg.style.position = 'absolute';
+                svg.style.top = '0';
+                svg.style.left = '0';
+                svg.style.width = '100%';
+                svg.style.height = '100%';
+                svg.style.pointerEvents = 'none';
+                svg.style.zIndex = '15';
+                
+                nf.unlockedShapes.forEach(shapeIndex => {
+                    const shape = OCTAVE_SHAPES[shapeIndex];
+                    
+                    // Vind alle instanties van dit patroon
+                    nf.foundPositions.forEach(anchorPos => {
+                        if (anchorPos.string !== shape.anchorString) return;
+                        if (shape.minAnchorFret && anchorPos.fret < shape.minAnchorFret) return;
+                        
+                        const baseFret = anchorPos.fret;
+                        const expectedPositions = shape.pattern.map(p => ({
+                            string: p.string,
+                            fret: baseFret + p.fretOffset
+                        }));
+                        
+                        // Check of alle posities gevonden zijn en geldig
+                        const allValid = expectedPositions.every(p => 
+                            p.fret >= 0 && p.fret <= nf.maxFret
+                        );
+                        if (!allValid) return;
+                        
+                        const allFound = expectedPositions.every(ep =>
+                            nf.foundPositions.some(fp => 
+                                fp.string === ep.string && fp.fret === ep.fret
+                            )
+                        );
+                        if (!allFound) return;
+                        
+                        // Haal de DOM elementen op en bereken posities
+                        const points = expectedPositions.map(pos => {
+                            const fretEl = fretboard.querySelector(
+                                `.fret[data-string="${pos.string}"][data-fret="${pos.fret}"]`
+                            );
+                            if (!fretEl) return null;
+                            
+                            const rect = fretEl.getBoundingClientRect();
+                            // Positie relatief aan container
+                            return {
+                                x: rect.left - containerRect.left + rect.width / 2,
+                                y: rect.top - containerRect.top + rect.height / 2
+                            };
+                        }).filter(p => p !== null);
+                        
+                        if (points.length >= 3) {
+                            // Teken de driehoek
+                            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                            const d = `M ${points[0].x} ${points[0].y} L ${points[1].x} ${points[1].y} L ${points[2].x} ${points[2].y} Z`;
+                            path.setAttribute('d', d);
+                            path.setAttribute('class', `shape-line ${shape.color}`);
+                            path.setAttribute('fill', 'none');
+                            path.setAttribute('stroke-width', '4');
+                            path.setAttribute('stroke-linecap', 'round');
+                            path.setAttribute('stroke-linejoin', 'round');
+                            svg.appendChild(path);
+                        }
+                    });
+                });
+            });
+        }
+
+        // Voeg resize listener toe voor responsive shapes
+        window.addEventListener('resize', () => {
+            if (state.mainMode === 'noteFinder' && state.noteFinder.active) {
+                renderShapeLines();
+            }
+        });
+
+        function updateNoteFinderStats() {
+            const nf = state.noteFinder;
+            document.getElementById('noteFinderTarget').textContent = nf.targetNote || '?';
+            document.getElementById('nfFound').textContent = nf.foundPositions.length;
+            document.getElementById('nfTotal').textContent = nf.allPositions.length;
+            document.getElementById('nfMistakes').textContent = nf.mistakes;
+        }
+
+        function showVictory() {
+            const nf = state.noteFinder;
+            document.getElementById('victoryStats').innerHTML = `
+                Je hebt alle <strong>${nf.allPositions.length}</strong> posities van <strong>${nf.targetNote}</strong> gevonden!<br>
+                <span style="color: #888;">Fouten: ${nf.mistakes} | Shapes: ${nf.unlockedShapes.length}/4</span>
+            `;
+            document.getElementById('victoryOverlay').classList.add('show');
+        }
+
+        function hideVictory() {
+            document.getElementById('victoryOverlay').classList.remove('show');
+        }
+
+        function skipToNextNote() {
+            hideVictory();
+            startNoteFinder();
+        }
+
+        function resetNoteFinder() {
+            const nf = state.noteFinder;
+            nf.active = false;
+            nf.targetNote = null;
+            nf.foundPositions = [];
+            nf.wrongPositions = [];
+            nf.unlockedShapes = [];
+            
+            document.getElementById('noteFinderHeader').classList.add('hidden');
+            document.getElementById('skipNoteBtn').disabled = true;
+            
+            // Reset shape indicators
+            document.querySelectorAll('.shape-indicator').forEach(el => {
+                el.classList.remove('unlocked', 'shape-green', 'shape-blue', 'shape-red', 'shape-purple');
+            });
+            
+            hideVictory();
             renderAll();
         }
 
@@ -1803,6 +2388,8 @@
                 renderCAGEDFretboard();
             } else if (state.mainMode === 'backing') {
                 renderBackingFretboard();
+            } else if (state.mainMode === 'noteFinder') {
+                renderNoteFinderFretboard();
             }
         }
 
@@ -1940,7 +2527,6 @@
             
             const scaleNotes = getScaleNotes(state.backingRoot, state.backingScale);
             
-            // Pre-calculate triad positions if needed (voor de TOONSOORT)
             let triadShapePositions = [];
             if (state.showTriads && state.backingChords.length === 0) {
                 triadShapePositions = getTriadShapePositions(state.backingRoot, state.backingScale);
@@ -1962,8 +2548,6 @@
                     const chordMembership = getNoteChordMembership(note);
                     const isInAnyChord = chordMembership.length > 0;
                     
-                    // Chord tones: check voor ELKE toegevoegde chord of deze noot een chord tone is
-                    // Dit vervangt de oude "globale" chord tone check
                     let isChordToneOfAnyChord = false;
                     state.backingChords.forEach(chord => {
                         const chordTones = getChordNotes(chord.root, chord.type);
@@ -1972,7 +2556,6 @@
                         }
                     });
                     
-                    // Als er geen akkoorden zijn, gebruik de toonsoort chord tones
                     if (state.backingChords.length === 0) {
                         const rootChordTones = getTriadNotes(state.backingRoot, state.backingScale);
                         isChordToneOfAnyChord = noteArrayIncludes(rootChordTones, note);
@@ -1985,7 +2568,6 @@
                     let noteClass = '';
                     
                     if (state.backingChords.length === 0) {
-                        // Geen akkoorden toegevoegd - toon toonladder
                         if (inScale) {
                             noteClass = 'scale-note';
                             if (state.showChordTones && isChordToneOfAnyChord) noteClass = 'chord-tone';
@@ -2010,7 +2592,6 @@
                             content = `<div class="note dimmed">${state.showNotes ? note : ''}</div>`;
                         }
                     } else {
-                        // Akkoorden zijn toegevoegd - kleur per akkoord
                         if (isInAnyChord) {
                             if (chordMembership.length === 1) {
                                 const colorIdx = chordMembership[0] % CHORD_COLORS.length;
@@ -2042,7 +2623,6 @@
                                 content = `<div class="note" style="${noteStyle}"></div>`;
                             }
                         } else if (inScale && !state.showOnlyChordNotes) {
-                            // In toonladder maar niet in akkoorden
                             let scaleStyle = `background: linear-gradient(135deg, #5b8dbf 0%, #4a75a0 100%); box-shadow: 0 0 8px rgba(91, 141, 191, 0.4);`;
                             
                             if (state.showNotes && state.showIntervals) {
@@ -2075,6 +2655,68 @@
             }
             
             document.querySelectorAll('.fret:not(.open-string)').forEach(f => f.addEventListener('click', handleFretClick));
+        }
+
+        function renderNoteFinderFretboard() {
+            const fb = document.getElementById('fretboard');
+            const nf = state.noteFinder;
+            fb.innerHTML = '';
+            
+            const maxFret = nf.active ? nf.maxFret : state.noteFinder.maxFret;
+            
+            fb.style.setProperty('--fret-count', maxFret + 1);
+            fb.innerHTML += ['', ...Array.from({length: maxFret + 1}, (_, i) => i)].map(n =>
+                `<div class="fret-number">${n}</div>`
+            ).join('');
+            
+            for (let str = 0; str < 6; str++) {
+                fb.innerHTML += `<div class="fret open-string"><span class="string-label">${TUNING[str]}</span></div>`;
+                
+                for (let fret = 0; fret <= maxFret; fret++) {
+                    const note = getNoteAtFret(str, fret);
+                    
+                    let content = '';
+                    
+                    if (nf.active) {
+                        const isFound = nf.foundPositions.some(p => p.string === str && p.fret === fret);
+                        const isWrong = nf.wrongPositions.some(p => p.string === str && p.fret === fret);
+                        
+                        if (isFound) {
+                            content = `<div class="note found">${note}</div>`;
+                        } else if (isWrong) {
+                            content = `<div class="note wrong"></div>`;
+                        } else {
+                            content = `<div class="note clickable"></div>`;
+                        }
+                    } else {
+                        // Niet actief - toon lege fretboard
+                        content = '';
+                    }
+                    
+                    let marker = '';
+                    if (str === 5) {
+                        if ([3, 5, 7, 9, 15, 17].includes(fret) && fret <= maxFret) marker = '<div class="fret-marker"></div>';
+                        else if (fret === 12) marker = '<div class="fret-marker double"></div>';
+                    }
+                    
+                    fb.innerHTML += `<div class="fret" data-string="${str}" data-fret="${fret}" data-note="${note}">${content}${marker}</div>`;
+                }
+            }
+            
+            // Event listeners voor Note Finder
+            document.querySelectorAll('.fret:not(.open-string)').forEach(f => {
+                f.addEventListener('click', (e) => {
+                    const str = parseInt(e.currentTarget.dataset.string);
+                    const fret = parseInt(e.currentTarget.dataset.fret);
+                    
+                    if (state.noteFinder.active) {
+                        handleNoteFinderClick(str, fret);
+                    }
+                });
+            });
+            
+            // Render shape lines after fretboard is built
+            setTimeout(() => renderShapeLines(), 50);
         }
 
         function handleFretClick(e) {
@@ -2120,11 +2762,17 @@
                         </div>
                     `).join('') + `
                         <div class="legend-item">
-                            <div class="legend-dot" style="background: linear-gradient(135deg, #7c9cb8 0%, #5a7a8a 100%);"></div>
+                            <div class="legend-dot" style="background: linear-gradient(135deg, #5b8dbf 0%, #4a75a0 100%);"></div>
                             Toonladder
                         </div>
                     `;
                 }
+            } else if (state.mainMode === 'noteFinder') {
+                legend.innerHTML = `
+                    <div class="legend-item"><div class="legend-dot" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);"></div> Gevonden</div>
+                    <div class="legend-item"><div class="legend-dot" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);"></div> Fout</div>
+                    <div class="legend-item"><div class="legend-dot" style="background: rgba(255,255,255,0.1); border: 2px dashed rgba(255,255,255,0.3);"></div> Klikbaar</div>
+                `;
             }
         }
 
@@ -2132,10 +2780,23 @@
             document.querySelectorAll('.main-mode-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.mainMode === state.mainMode);
                 btn.onclick = () => {
+                    // Reset note finder als we wegnavigeren
+                    if (state.mainMode === 'noteFinder' && btn.dataset.mainMode !== 'noteFinder') {
+                        resetNoteFinder();
+                    }
+                    
                     state.mainMode = btn.dataset.mainMode;
                     document.getElementById('scalesControls').classList.toggle('hidden', state.mainMode !== 'scales');
                     document.getElementById('cagedControls').classList.toggle('hidden', state.mainMode !== 'caged');
                     document.getElementById('backingControls').classList.toggle('hidden', state.mainMode !== 'backing');
+                    document.getElementById('noteFinderControls').classList.toggle('hidden', state.mainMode !== 'noteFinder');
+                    document.getElementById('fretToggleContainer').classList.toggle('hidden', state.mainMode === 'noteFinder');
+                    document.getElementById('quizContainer').classList.toggle('hidden', state.mainMode === 'noteFinder');
+                    
+                    if (state.mainMode !== 'noteFinder') {
+                        document.getElementById('noteFinderHeader').classList.add('hidden');
+                    }
+                    
                     renderAll();
                 };
             });
@@ -2143,6 +2804,8 @@
             document.getElementById('scalesControls').classList.toggle('hidden', state.mainMode !== 'scales');
             document.getElementById('cagedControls').classList.toggle('hidden', state.mainMode !== 'caged');
             document.getElementById('backingControls').classList.toggle('hidden', state.mainMode !== 'backing');
+            document.getElementById('noteFinderControls').classList.toggle('hidden', state.mainMode !== 'noteFinder');
+            document.getElementById('fretToggleContainer').classList.toggle('hidden', state.mainMode === 'noteFinder');
         }
 
         function renderRootNotes() {
@@ -2211,7 +2874,6 @@
                 };
             });
             
-            // Add chord button
             const addBtn = document.getElementById('addChordBtn');
             addBtn.style.display = state.backingChords.length >= 6 ? 'none' : 'inline-block';
             addBtn.onclick = () => {
@@ -2219,7 +2881,6 @@
                 renderChordPicker();
             };
             
-            // Legend
             renderBackingLegend();
         }
 
@@ -2414,6 +3075,47 @@
             });
         }
 
+        function renderNoteFinderControls() {
+            // Fret count toggle
+            document.querySelectorAll('[data-nf-frets]').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.nfFrets) === state.noteFinder.maxFret);
+                btn.onclick = () => {
+                    state.noteFinder.maxFret = parseInt(btn.dataset.nfFrets);
+                    if (state.noteFinder.active) {
+                        resetNoteFinder();
+                    }
+                    renderAll();
+                };
+            });
+            
+            // Note count toggle
+            document.querySelectorAll('[data-nf-notes]').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.nfNotes) === state.noteFinder.noteCount);
+                btn.onclick = () => {
+                    state.noteFinder.noteCount = parseInt(btn.dataset.nfNotes);
+                    // Reset selected note als die niet meer beschikbaar is
+                    if (state.noteFinder.noteCount === 7 && 
+                        !NATURAL_NOTES.includes(state.noteFinder.selectedNote) &&
+                        state.noteFinder.selectedNote !== 'random') {
+                        state.noteFinder.selectedNote = 'random';
+                    }
+                    if (state.noteFinder.active) {
+                        resetNoteFinder();
+                    }
+                    renderAll();
+                };
+            });
+            
+            // Note selection
+            renderNoteFinderNoteSelect();
+            
+            // Start button
+            document.getElementById('startNoteFinderBtn').onclick = startNoteFinder;
+            
+            // Skip button
+            document.getElementById('skipNoteBtn').onclick = skipToNextNote;
+        }
+
         function renderModes() {
             const container = document.getElementById('modes');
             const modes = [
@@ -2486,10 +3188,10 @@
                 for (let i = 0; i < 100; i++) {
                     const str = Math.floor(Math.random() * 6);
                     const fret = Math.floor(Math.random() * 13);
-                    const note = getNoteAtFret(str, fret);
+                    const note = getNoteAtFret(str, fret, state.rootNote);
                     
-                    if (scaleNotes.includes(note) && isInBox(str, fret, state.selectedBox, state.rootNote, state.scaleType)) {
-                        const wrong = NOTES.filter(n => n !== note).sort(() => Math.random() - 0.5).slice(0, 3);
+                    if (noteArrayIncludes(scaleNotes, note) && isInBox(str, fret, state.selectedBox, state.rootNote, state.scaleType)) {
+                        const wrong = NOTES.filter(n => !isSameNote(n, note)).sort(() => Math.random() - 0.5).slice(0, 3);
                         state.currentQuiz = {
                             string: str,
                             fret: fret,
@@ -2506,7 +3208,8 @@
                 const valid = [];
                 for (let s = 0; s < 6; s++) {
                     for (let f = 0; f <= 12; f++) {
-                        if (getNoteAtFret(s, f) === target && isInBox(s, f, state.selectedBox, state.rootNote)) {
+                        const note = getNoteAtFret(s, f, state.rootNote);
+                        if (isSameNote(note, target) && isInBox(s, f, state.selectedBox, state.rootNote, state.scaleType)) {
                             valid.push({ string: s, fret: f });
                         }
                     }
@@ -2520,13 +3223,13 @@
             state.answered = true;
             state.quizTotal++;
             
-            const correct = btn.dataset.answer === state.currentQuiz.correctAnswer;
+            const correct = isSameNote(btn.dataset.answer, state.currentQuiz.correctAnswer);
             if (correct) state.quizScore++;
             
             btn.classList.add(correct ? 'correct' : 'wrong');
             if (!correct) {
                 document.querySelectorAll('.quiz-option').forEach(b => {
-                    if (b.dataset.answer === state.currentQuiz.correctAnswer) b.classList.add('correct');
+                    if (isSameNote(b.dataset.answer, state.currentQuiz.correctAnswer)) b.classList.add('correct');
                 });
             }
             
@@ -2551,7 +3254,8 @@
             
             if (!correct) {
                 const el = document.querySelector(`.fret[data-string="${str}"][data-fret="${fret}"]`);
-                if (el) el.innerHTML = `<div class="note" style="background:#ef4444">${getNoteAtFret(str, fret)}</div>`;
+                const note = getNoteAtFret(str, fret, state.rootNote);
+                if (el) el.innerHTML = `<div class="note" style="background:#ef4444">${note}</div>`;
             }
             
             renderQuiz();
@@ -2570,29 +3274,24 @@
                 return;
             }
             
+            if (state.mainMode === 'noteFinder') {
+                renderNoteFinderInfo();
+                return;
+            }
+            
             const scaleNotes = getScaleNotes(state.rootNote, state.scaleType);
             const scale = SCALES[state.scaleType];
             const chords = getChordsInKey(state.rootNote, state.scaleType);
             const triadNotes = getTriadNotes(state.rootNote, state.scaleType);
             const isMinor = state.scaleType.includes('minor') || state.scaleType === 'minorPentatonic';
             
-            // Dynamische interval beschrijvingen
             const intervalDescriptions = {
-                '1': 'Grondtoon',
-                'b2': 'Kleine secunde',
-                '2': 'Grote secunde',
-                'b3': 'Kleine terts',
-                '3': 'Grote terts',
-                '4': 'Reine kwart',
-                'b5': 'Verminderde kwint',
-                '5': 'Reine kwint',
-                'b6': 'Kleine sext',
-                '6': 'Grote sext',
-                'b7': 'Kleine septiem',
-                '7': 'Grote septiem'
+                '1': 'Grondtoon', 'b2': 'Kleine secunde', '2': 'Grote secunde',
+                'b3': 'Kleine terts', '3': 'Grote terts', '4': 'Reine kwart',
+                'b5': 'Verminderde kwint', '5': 'Reine kwint', 'b6': 'Kleine sext',
+                '6': 'Grote sext', 'b7': 'Kleine septiem', '7': 'Grote septiem'
             };
             
-            // Genereer legenda items alleen voor intervallen in deze toonladder
             const intervalLegendItems = scale.intervalNames.map(interval => 
                 `<div class="interval-legend-item"><strong>${interval}</strong> ${intervalDescriptions[interval] || interval}</div>`
             ).join('');
@@ -2690,7 +3389,6 @@
                 return;
             }
             
-            // Find notes that are in multiple chords (safest notes)
             const noteChordCount = {};
             state.backingChords.forEach(chord => {
                 const notes = getChordNotes(chord.root, chord.type);
@@ -2743,6 +3441,98 @@
             `;
         }
 
+        function renderNoteFinderInfo() {
+            const container = document.getElementById('infoContent');
+            const nf = state.noteFinder;
+            
+            if (!nf.active) {
+                container.innerHTML = `
+                    <div class="info-section">
+                        <h4>🎯 Note Finder</h4>
+                        <p>Train je geheugen voor nootposities op de fretboard.</p>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h4>Geometrische Patronen</h4>
+                        <p>Dezelfde noot komt op meerdere plekken voor. Deze vormen <strong>geometrische patronen</strong>:</p>
+                        <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 20px; height: 20px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 4px;"></div>
+                                <span style="color: #aaa;">Groene driehoek: E6 → G → E1</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 20px; height: 20px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 4px;"></div>
+                                <span style="color: #aaa;">Blauwe driehoek: E6 → D → E1</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 20px; height: 20px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border-radius: 4px;"></div>
+                                <span style="color: #aaa;">Rode driehoek: D → G → B</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 20px; height: 20px; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 4px;"></div>
+                                <span style="color: #aaa;">Paarse driehoek: G → B → E1 (met B-snaar shift)</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section">
+                        <h4>Tips</h4>
+                        <p>• De <strong>lage E</strong> en <strong>hoge E</strong> snaar hebben dezelfde noten</p>
+                        <p style="margin-top: 6px;">• Tussen de meeste snaren zit <strong>5 frets</strong> verschil (behalve G→B: 4 frets)</p>
+                        <p style="margin-top: 6px;">• Fret 12 = dezelfde noot als de open snaar (octaaf hoger)</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Active game info
+            const shapesInfo = OCTAVE_SHAPES.map((shape, i) => {
+                const unlocked = nf.unlockedShapes.includes(i);
+                return `
+                    <div style="display: flex; align-items: center; gap: 10px; opacity: ${unlocked ? '1' : '0.4'};">
+                        <div style="width: 20px; height: 20px; background: linear-gradient(135deg, ${getShapeGradient(shape.color)}); border-radius: 4px;"></div>
+                        <span style="color: ${unlocked ? '#fff' : '#666'};">${shape.name} ${unlocked ? '✓' : ''}</span>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = `
+                <div class="info-section">
+                    <h4>🎯 Zoek: ${nf.targetNote}</h4>
+                    <p>Klik op alle posities waar je <strong>${nf.targetNote}</strong> kunt vinden.</p>
+                    <p style="margin-top: 8px; color: #888;">
+                        Voortgang: <strong style="color: #10b981;">${nf.foundPositions.length}</strong> / ${nf.allPositions.length} posities
+                    </p>
+                </div>
+                
+                <div class="info-section">
+                    <h4>Ontgrendelde Shapes</h4>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        ${shapesInfo}
+                    </div>
+                    <p style="margin-top: 12px; color: #888; font-size: 0.85rem;">
+                        Vind 3 noten die een driehoek vormen om een shape te ontgrendelen!
+                    </p>
+                </div>
+                
+                <div class="info-section">
+                    <h4>Statistieken</h4>
+                    <p>Fouten: <strong style="color: ${nf.mistakes > 0 ? '#ef4444' : '#10b981'};">${nf.mistakes}</strong></p>
+                    <p style="margin-top: 6px;">Shapes: <strong style="color: #5b8dbf;">${nf.unlockedShapes.length}</strong> / 4</p>
+                </div>
+            `;
+        }
+
+        function getShapeGradient(color) {
+            const gradients = {
+                'green': '#10b981 0%, #059669 100%',
+                'blue': '#3b82f6 0%, #2563eb 100%',
+                'red': '#ef4444 0%, #dc2626 100%',
+                'purple': '#8b5cf6 0%, #7c3aed 100%'
+            };
+            return gradients[color] || gradients['green'];
+        }
+
         function getShapeColor(shape) {
             const colors = { C: '#ef4444', A: '#f59e0b', G: '#10b981', E: '#3b82f6', D: '#8b5cf6' };
             return colors[shape] || '#fff';
@@ -2764,6 +3554,8 @@
             renderToggles();
             renderCAGEDToggles();
             renderBackingToggles();
+            renderNoteFinderControls();
+            renderNoteFinderNoteSelect();
             renderModes();
             renderFretboard();
             renderLegend();
@@ -2778,9 +3570,27 @@
                 state.maxFret === 12 ? 'Toon meer frets (17)' : 'Toon minder frets (12)';
             renderAll();
         };
+
+        // Victory buttons
+        document.getElementById('victoryNextBtn').onclick = skipToNextNote;
+        document.getElementById('victoryViewBtn').onclick = hideVictory;
+        document.getElementById('victoryRestartBtn').onclick = () => {
+            hideVictory();
+            startNoteFinder();
+        };
         
         // Keyboard shortcuts
+        
         document.addEventListener('keydown', (e) => {
+
+            if (e.key === 'Escape') {
+                if (document.getElementById('victoryOverlay').classList.contains('show')) {
+                    hideVictory();
+                    return;
+                }
+            }
+            
+
             if (e.target.tagName === 'INPUT') return;
             
             if (e.key >= '0' && e.key <= '5') {
@@ -2807,7 +3617,7 @@
                 renderAll(); 
             }
             if (e.key === 'm' || e.key === 'M') { 
-                const modes = ['scales', 'caged', 'backing'];
+                const modes = ['scales', 'caged', 'backing', 'noteFinder'];
                 const currentIndex = modes.indexOf(state.mainMode);
                 state.mainMode = modes[(currentIndex + 1) % modes.length];
                 renderAll(); 
@@ -2817,6 +3627,16 @@
                 state.answered = false;
                 generateQuiz();
                 renderAll();
+            }
+            
+            // Note Finder shortcuts
+            if (state.mainMode === 'noteFinder') {
+                if (e.key === 's' || e.key === 'S') {
+                    startNoteFinder();
+                }
+                if ((e.key === 'n' || e.key === 'N') && state.noteFinder.active) {
+                    skipToNextNote();
+                }
             }
         });
 
