@@ -1253,6 +1253,68 @@
         .shape-line.blue { stroke: #3b82f6; }
         .shape-line.red { stroke: #ef4444; }
         .shape-line.purple { stroke: #8b5cf6; }
+
+        /* Note Finder - Completed notes */
+        .root-note-btn.completed {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: #10b981;
+            position: relative;
+        }
+        
+        .root-note-btn.completed.active {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        .root-note-btn .completed-check {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 50%;
+            font-size: 0.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        /* Progress indicator */
+        .note-finder-progress {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.85rem;
+            color: #888;
+        }
+        
+        .note-finder-progress strong {
+            color: #10b981;
+        }
+        
+        .reset-progress-btn {
+            padding: 4px 10px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #888;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            margin-left: auto;
+        }
+        
+        .reset-progress-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+
     </style>
 </head>
 <body>
@@ -1378,41 +1440,21 @@
                         <button class="chord-type-btn" data-nf-frets="17">17</button>
                     </div>
                 </div>
-                <div class="toggle-item" style="margin-top: 12px;">
-                    <span class="toggle-label">Noten</span>
-                    <div class="chord-type-selector" style="margin: 0;">
-                        <button class="chord-type-btn active" data-nf-notes="7">7 (naturel)</button>
-                        <button class="chord-type-btn" data-nf-notes="12">12 (alle)</button>
-                    </div>
-                </div>
             </div>
 
-            <div class="panel">
-                <h3><span class="icon">🎵</span> Kies Noot (optioneel)</h3>
-                <div class="root-notes" id="noteFinderNoteSelect">
-                    <button class="root-note-btn active" data-nf-note="random">🎲</button>
-                </div>
-            </div>
-
-            <div class="panel">
-                <h3><span class="icon">🎮</span> Game</h3>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button class="mode-btn" id="startNoteFinderBtn" style="flex: 1; text-align: center;">
-                        ▶️ Start Nieuwe Ronde
-                    </button>
-                    <button class="mode-btn" id="skipNoteBtn" style="flex: 1; text-align: center;" disabled>
-                        ⏭️ Volgende Noot
-                    </button>
-                </div>
+            <div class="panel" style="grid-column: span 2;">
+                <h3><span class="icon">🎵</span> Kies een noot om te oefenen</h3>
+                <div class="root-notes" id="noteFinderNoteSelect"></div>
+                <div class="note-finder-progress" id="noteFinderProgress"></div>
             </div>
 
             <div class="panel">
                 <h3><span class="icon">💡</span> Hoe het werkt</h3>
                 <p style="font-size: 0.85rem; color: #aaa; line-height: 1.5;">
-                    1. Klik op <strong style="color: #fff;">Start</strong> of kies een specifieke noot<br>
-                    2. Vind alle posities van de getoonde noot<br>
-                    3. Ontgrendel <strong style="color: #10b981;">geometrische patronen</strong><br>
-                    4. Leer de fretboard als een visueel systeem!
+                    1. Klik op een <strong style="color: #fff;">noot</strong> hierboven<br>
+                    2. Vind alle posities van die noot<br>
+                    3. Voltooide noten krijgen een <strong style="color: #10b981;">✓</strong><br>
+                    4. Probeer alle 12 noten vandaag!
                 </p>
             </div>
         </div>
@@ -1733,7 +1775,7 @@
             noteFinder: {
                 active: false,
                 maxFret: 12,
-                noteCount: 7,
+                noteCount: 12,
                 selectedNote: 'random', // 'random' of specifieke noot
                 targetNote: null,
                 allPositions: [],
@@ -2059,13 +2101,78 @@
             return positions;
         }
 
+        // ============================================
+        // NOTE FINDER PROGRESS (LocalStorage)
+        // ============================================
+        
+        function getTodayKey() {
+            const today = new Date();
+            return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        }
+        
+        function getCompletedNotesToday() {
+            try {
+                const data = JSON.parse(localStorage.getItem('noteFinderProgress') || '{}');
+                return data[getTodayKey()] || [];
+            } catch (e) {
+                return [];
+            }
+        }
+        
+        function markNoteAsCompleted(note) {
+            try {
+                const data = JSON.parse(localStorage.getItem('noteFinderProgress') || '{}');
+                const today = getTodayKey();
+                
+                if (!data[today]) {
+                    data[today] = [];
+                }
+                
+                // Normaliseer de noot (bijv. Bb en A# zijn hetzelfde)
+                const noteIndex = getNoteIndex(note);
+                const normalizedNote = NOTES[noteIndex];
+                
+                if (!data[today].includes(normalizedNote)) {
+                    data[today].push(normalizedNote);
+                }
+                
+                // Bewaar alleen laatste 7 dagen om localStorage klein te houden
+                const keys = Object.keys(data).sort().reverse();
+                const cleanedData = {};
+                keys.slice(0, 7).forEach(key => {
+                    cleanedData[key] = data[key];
+                });
+                
+                localStorage.setItem('noteFinderProgress', JSON.stringify(cleanedData));
+            } catch (e) {
+                console.warn('Could not save progress:', e);
+            }
+        }
+        
+        function isNoteCompletedToday(note) {
+            const completed = getCompletedNotesToday();
+            const noteIndex = getNoteIndex(note);
+            const normalizedNote = NOTES[noteIndex];
+            return completed.includes(normalizedNote);
+        }
+        
+        function resetTodayProgress() {
+            try {
+                const data = JSON.parse(localStorage.getItem('noteFinderProgress') || '{}');
+                delete data[getTodayKey()];
+                localStorage.setItem('noteFinderProgress', JSON.stringify(data));
+                renderAll();
+            } catch (e) {
+                console.warn('Could not reset progress:', e);
+            }
+        }
+
         function startNoteFinder() {
             const nf = state.noteFinder;
             
             // Kies noot op basis van selectie
             if (nf.selectedNote === 'random') {
-                const availableNotes = nf.noteCount === 7 ? NATURAL_NOTES : NOTES;
-                nf.targetNote = availableNotes[Math.floor(Math.random() * availableNotes.length)];
+                nf.targetNote = NOTES[Math.floor(Math.random() * NOTES.length)];
             } else {
                 nf.targetNote = nf.selectedNote;
             }
@@ -2085,7 +2192,6 @@
             
             // Update UI
             document.getElementById('noteFinderHeader').classList.remove('hidden');
-            document.getElementById('skipNoteBtn').disabled = false;
             
             renderAll();
             updateNoteFinderStats();
@@ -2096,23 +2202,46 @@
             if (!container) return;
             
             const nf = state.noteFinder;
-            const availableNotes = nf.noteCount === 7 ? NATURAL_NOTES : NOTES;
+            const completedToday = getCompletedNotesToday();
             
-            container.innerHTML = `
-                <button class="root-note-btn ${nf.selectedNote === 'random' ? 'active' : ''}" 
-                        data-nf-note="random" title="Willekeurig">🎲</button>
-                ${availableNotes.map(note => `
-                    <button class="root-note-btn ${nf.selectedNote === note ? 'active' : ''}" 
-                            data-nf-note="${note}">${note}</button>
-                `).join('')}
-            `;
+            container.innerHTML = NOTES.map(note => {
+                const isCompleted = completedToday.includes(note);
+                const isActive = nf.selectedNote === note;
+                const isCurrentlyPlaying = nf.active && nf.targetNote === note;
+                
+                return `
+                    <button class="root-note-btn ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}" 
+                            data-nf-note="${note}"
+                            title="${isCompleted ? 'Vandaag voltooid!' : 'Klik om te oefenen'}">
+                        ${note}
+                        ${isCompleted ? '<span class="completed-check">✓</span>' : ''}
+                    </button>
+                `;
+            }).join('');
             
             container.querySelectorAll('.root-note-btn').forEach(btn => {
                 btn.onclick = () => {
                     nf.selectedNote = btn.dataset.nfNote;
-                    renderNoteFinderNoteSelect();
+                    startNoteFinder();
                 };
             });
+        }
+
+        function renderNoteFinderProgress() {
+            const container = document.getElementById('noteFinderProgress');
+            if (!container) return;
+            
+            const completed = getCompletedNotesToday();
+            const total = NOTES.length;
+            
+            container.innerHTML = `
+                <span>Vandaag: <strong>${completed.length}</strong> / ${total} noten</span>
+                ${completed.length > 0 ? `
+                    <button class="reset-progress-btn" onclick="resetTodayProgress()" title="Reset voortgang van vandaag">
+                        Reset
+                    </button>
+                ` : ''}
+            `;
         }
 
         function handleNoteFinderClick(string, fret) {
@@ -2120,16 +2249,15 @@
             if (!nf.active) return;
             
             const clickedNote = getNoteAtFret(string, fret);
-            const posKey = `${string}-${fret}`;
             
             // Check of al gevonden
             if (nf.foundPositions.some(p => p.string === string && p.fret === fret)) {
-                return; // Al gevonden, negeer
+                return;
             }
             
             // Check of al fout geklikt
             if (nf.wrongPositions.some(p => p.string === string && p.fret === fret)) {
-                return; // Al fout, negeer
+                return;
             }
             
             if (isSameNote(clickedNote, nf.targetNote)) {
@@ -2140,10 +2268,12 @@
                 // Check voor unlocked shapes
                 checkForUnlockedShapes();
                 
-                // Check of alles gevonden
-                // if (nf.foundPositions.length === nf.allPositions.length) {
-                    // setTimeout(() => showVictory(), 300);
-                // }
+                // Check of alles gevonden - markeer als voltooid!
+                if (nf.foundPositions.length === nf.allPositions.length) {
+                    markNoteAsCompleted(nf.targetNote);
+                    // Update UI om vinkje te tonen
+                    renderNoteFinderNoteSelect();
+                }
             } else {
                 // Fout
                 nf.wrongPositions.push({ string, fret });
@@ -3081,26 +3211,9 @@
                 btn.classList.toggle('active', parseInt(btn.dataset.nfFrets) === state.noteFinder.maxFret);
                 btn.onclick = () => {
                     state.noteFinder.maxFret = parseInt(btn.dataset.nfFrets);
+                    // Herstart alleen als game actief is
                     if (state.noteFinder.active) {
-                        resetNoteFinder();
-                    }
-                    renderAll();
-                };
-            });
-            
-            // Note count toggle
-            document.querySelectorAll('[data-nf-notes]').forEach(btn => {
-                btn.classList.toggle('active', parseInt(btn.dataset.nfNotes) === state.noteFinder.noteCount);
-                btn.onclick = () => {
-                    state.noteFinder.noteCount = parseInt(btn.dataset.nfNotes);
-                    // Reset selected note als die niet meer beschikbaar is
-                    if (state.noteFinder.noteCount === 7 && 
-                        !NATURAL_NOTES.includes(state.noteFinder.selectedNote) &&
-                        state.noteFinder.selectedNote !== 'random') {
-                        state.noteFinder.selectedNote = 'random';
-                    }
-                    if (state.noteFinder.active) {
-                        resetNoteFinder();
+                        startNoteFinder();
                     }
                     renderAll();
                 };
@@ -3108,12 +3221,6 @@
             
             // Note selection
             renderNoteFinderNoteSelect();
-            
-            // Start button
-            document.getElementById('startNoteFinderBtn').onclick = startNoteFinder;
-            
-            // Skip button
-            document.getElementById('skipNoteBtn').onclick = skipToNextNote;
         }
 
         function renderModes() {
@@ -3556,6 +3663,7 @@
             renderBackingToggles();
             renderNoteFinderControls();
             renderNoteFinderNoteSelect();
+            renderNoteFinderProgress(); 
             renderModes();
             renderFretboard();
             renderLegend();
