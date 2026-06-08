@@ -1315,6 +1315,25 @@
             color: #ef4444;
         }
 
+        /* Interval Finder Styles (Fretjam style) */
+        .note.interval-root {
+            background: #fff566;
+            color: #cc0000;
+            border-radius: 4px;
+            font-weight: 800;
+            border: 2px solid #cc0000;
+            box-shadow: 0 0 10px rgba(255, 245, 102, 0.3);
+        }
+
+        .note.interval-target-found {
+            background: #fff566;
+            color: #000;
+            border-radius: 4px;
+            font-weight: 800;
+            border: 2px solid #000;
+            box-shadow: 0 0 10px rgba(255, 245, 102, 0.5);
+            animation: noteFound 0.3s ease-out;
+        }
     </style>
 </head>
 <body>
@@ -1433,7 +1452,16 @@
         <div class="control-panel hidden" id="noteFinderControls">
             <div class="panel">
                 <h3><span class="icon">⚙️</span> Instellingen</h3>
+                
                 <div class="toggle-item">
+                    <span class="toggle-label">Oefening Type</span>
+                    <div class="chord-type-selector" style="margin: 0;">
+                        <button class="chord-type-btn active" data-nf-mode="notes">Noten</button>
+                        <button class="chord-type-btn" data-nf-mode="intervals">Intervallen</button>
+                    </div>
+                </div>
+
+                <div class="toggle-item" style="margin-top: 10px;">
                     <span class="toggle-label">Aantal frets</span>
                     <div class="chord-type-selector" style="margin: 0;">
                         <button class="chord-type-btn active" data-nf-frets="12">12</button>
@@ -1443,14 +1471,22 @@
             </div>
 
             <div class="panel" style="grid-column: span 2;">
-                <h3><span class="icon">🎵</span> Kies een noot om te oefenen</h3>
+                <h3 id="nfTitleMain"><span class="icon">🎵</span> Kies een noot om te oefenen</h3>
                 <div class="root-notes" id="noteFinderNoteSelect"></div>
+                
+                <div id="nfIntervalOptions" class="hidden" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <h3 style="margin-bottom: 10px; font-size: 0.8rem;"><span class="icon">📏</span> Welk interval wil je vinden?</h3>
+                    <div class="chord-type-selector" style="margin: 0; justify-content: flex-start;">
+                        <button class="chord-type-btn active" data-nf-int="b3">Minor 3rd (b3)</button>
+                        </div>
+                </div>
+
                 <div class="note-finder-progress" id="noteFinderProgress"></div>
             </div>
 
             <div class="panel">
                 <h3><span class="icon">💡</span> Hoe het werkt</h3>
-                <p style="font-size: 0.85rem; color: #aaa; line-height: 1.5;">
+                <p id="nfHelpText" style="font-size: 0.85rem; color: #aaa; line-height: 1.5;">
                     1. Klik op een <strong style="color: #fff;">noot</strong> hierboven<br>
                     2. Vind alle posities van die noot<br>
                     3. Voltooide noten krijgen een <strong style="color: #10b981;">✓</strong><br>
@@ -1777,6 +1813,8 @@
                 maxFret: 12,
                 noteCount: 12,
                 selectedNote: 'random', // 'random' of specifieke noot
+                findMode: 'notes', // NIEUW: 'notes' of 'intervals'
+                intervalTarget: 'b3', // NIEUW: Het huidige doel-interval
                 targetNote: null,
                 allPositions: [],
                 foundPositions: [],
@@ -2110,40 +2148,48 @@
             return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
         }
         
-        function getCompletedNotesToday() {
+        function getCompletedTodayData() {
             try {
-                const data = JSON.parse(localStorage.getItem('noteFinderProgress') || '{}');
-                return data[getTodayKey()] || [];
+                // Gebruik een nieuwe key 'noteFinderProgressV2' om conflicten met de oude data te voorkomen
+                const data = JSON.parse(localStorage.getItem('noteFinderProgressV2') || '{}');
+                const today = getTodayKey();
+                if (!data[today]) {
+                    data[today] = { notes: [], intervals: {} };
+                }
+                return data;
             } catch (e) {
-                return [];
+                const today = getTodayKey();
+                return { [today]: { notes: [], intervals: {} } };
             }
         }
         
-        function markNoteAsCompleted(note) {
+        function markNoteAsCompleted(note, mode = 'notes', interval = null) {
             try {
-                const data = JSON.parse(localStorage.getItem('noteFinderProgress') || '{}');
+                const data = getCompletedTodayData();
                 const today = getTodayKey();
                 
-                if (!data[today]) {
-                    data[today] = [];
-                }
-                
-                // Normaliseer de noot (bijv. Bb en A# zijn hetzelfde)
                 const noteIndex = getNoteIndex(note);
                 const normalizedNote = NOTES[noteIndex];
                 
-                if (!data[today].includes(normalizedNote)) {
-                    data[today].push(normalizedNote);
+                if (mode === 'notes') {
+                    if (!data[today].notes.includes(normalizedNote)) {
+                        data[today].notes.push(normalizedNote);
+                    }
+                } else if (mode === 'intervals' && interval) {
+                    if (!data[today].intervals[interval]) {
+                        data[today].intervals[interval] = [];
+                    }
+                    if (!data[today].intervals[interval].includes(normalizedNote)) {
+                        data[today].intervals[interval].push(normalizedNote);
+                    }
                 }
                 
-                // Bewaar alleen laatste 7 dagen om localStorage klein te houden
+                // Bewaar laatste 7 dagen
                 const keys = Object.keys(data).sort().reverse();
                 const cleanedData = {};
-                keys.slice(0, 7).forEach(key => {
-                    cleanedData[key] = data[key];
-                });
+                keys.slice(0, 7).forEach(key => cleanedData[key] = data[key]);
                 
-                localStorage.setItem('noteFinderProgress', JSON.stringify(cleanedData));
+                localStorage.setItem('noteFinderProgressV2', JSON.stringify(cleanedData));
             } catch (e) {
                 console.warn('Could not save progress:', e);
             }
@@ -2158,9 +2204,17 @@
         
         function resetTodayProgress() {
             try {
-                const data = JSON.parse(localStorage.getItem('noteFinderProgress') || '{}');
-                delete data[getTodayKey()];
-                localStorage.setItem('noteFinderProgress', JSON.stringify(data));
+                const data = getCompletedTodayData();
+                const today = getTodayKey();
+                
+                const nf = state.noteFinder;
+                if (nf.findMode === 'notes') {
+                    data[today].notes = [];
+                } else if (nf.findMode === 'intervals') {
+                    data[today].intervals[nf.intervalTarget] = [];
+                }
+                
+                localStorage.setItem('noteFinderProgressV2', JSON.stringify(data));
                 renderAll();
             } catch (e) {
                 console.warn('Could not reset progress:', e);
@@ -2170,11 +2224,30 @@
         function startNoteFinder() {
             const nf = state.noteFinder;
             
-            // Kies noot op basis van selectie
-            if (nf.selectedNote === 'random') {
-                nf.targetNote = NOTES[Math.floor(Math.random() * NOTES.length)];
+            // Bepaal de root (bij intervals) of de target (bij notes)
+            let rootOrTarget = nf.selectedNote;
+            if (rootOrTarget === 'random') {
+                rootOrTarget = NOTES[Math.floor(Math.random() * NOTES.length)];
+            }
+            
+            if (nf.findMode === 'intervals') {
+                // In interval modus is de gekozen noot de root.
+                nf.selectedNote = rootOrTarget; 
+                const rootIndex = getNoteIndex(rootOrTarget);
+                
+                // DE FIX: Check voor het nieuwe '♭3' symbool (of 'b3' als fallback)
+                let offset = 0;
+                if (nf.intervalTarget === '♭3' || nf.intervalTarget === 'b3') {
+                    offset = 3; // 3 halve stappen voor een minor 3rd
+                }
+                
+                // Tip voor de toekomst: hier kun je makkelijk toevoegen:
+                // else if (nf.intervalTarget === '5') offset = 7;
+                // else if (nf.intervalTarget === '3') offset = 4;
+                
+                nf.targetNote = getNoteName(rootIndex + offset, rootOrTarget);
             } else {
-                nf.targetNote = nf.selectedNote;
+                nf.targetNote = rootOrTarget;
             }
             
             // Reset state
@@ -2190,9 +2263,7 @@
                 el.classList.remove('unlocked', 'shape-green', 'shape-blue', 'shape-red', 'shape-purple');
             });
             
-            // Update UI
             document.getElementById('noteFinderHeader').classList.remove('hidden');
-            
             renderAll();
             updateNoteFinderStats();
         }
@@ -2202,12 +2273,14 @@
             if (!container) return;
             
             const nf = state.noteFinder;
-            const completedToday = getCompletedNotesToday();
+            const data = getCompletedTodayData()[getTodayKey()];
+            
+            // Kijk naar de juiste lijst afhankelijk van de modus
+            const completedList = nf.findMode === 'notes' ? data.notes : (data.intervals[nf.intervalTarget] || []);
             
             container.innerHTML = NOTES.map(note => {
-                const isCompleted = completedToday.includes(note);
+                const isCompleted = completedList.includes(note);
                 const isActive = nf.selectedNote === note;
-                const isCurrentlyPlaying = nf.active && nf.targetNote === note;
                 
                 return `
                     <button class="root-note-btn ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}" 
@@ -2231,12 +2304,14 @@
             const container = document.getElementById('noteFinderProgress');
             if (!container) return;
             
-            const completed = getCompletedNotesToday();
+            const nf = state.noteFinder;
+            const data = getCompletedTodayData()[getTodayKey()];
+            const completedList = nf.findMode === 'notes' ? data.notes : (data.intervals[nf.intervalTarget] || []);
             const total = NOTES.length;
             
             container.innerHTML = `
-                <span>Vandaag: <strong>${completed.length}</strong> / ${total} noten</span>
-                ${completed.length > 0 ? `
+                <span>Vandaag: <strong>${completedList.length}</strong> / ${total} ${nf.findMode === 'notes' ? 'noten' : 'intervallen'}</span>
+                ${completedList.length > 0 ? `
                     <button class="reset-progress-btn" onclick="resetTodayProgress()" title="Reset voortgang van vandaag">
                         Reset
                     </button>
@@ -2250,32 +2325,30 @@
             
             const clickedNote = getNoteAtFret(string, fret);
             
-            // Check of al gevonden
-            if (nf.foundPositions.some(p => p.string === string && p.fret === fret)) {
+            if (nf.findMode === 'intervals' && isSameNote(clickedNote, nf.selectedNote)) {
+                playNote(string, fret); 
                 return;
             }
             
-            // Check of al fout geklikt
-            if (nf.wrongPositions.some(p => p.string === string && p.fret === fret)) {
-                return;
-            }
+            if (nf.foundPositions.some(p => p.string === string && p.fret === fret)) return;
+            if (nf.wrongPositions.some(p => p.string === string && p.fret === fret)) return;
             
             if (isSameNote(clickedNote, nf.targetNote)) {
-                // Correct!
                 nf.foundPositions.push({ string, fret });
                 playNote(string, fret);
                 
-                // Check voor unlocked shapes
-                checkForUnlockedShapes();
+                if (nf.findMode === 'notes') {
+                    checkForUnlockedShapes();
+                }
                 
-                // Check of alles gevonden - markeer als voltooid!
                 if (nf.foundPositions.length === nf.allPositions.length) {
-                    markNoteAsCompleted(nf.targetNote);
-                    // Update UI om vinkje te tonen
+                    // Update opslag met de juiste modus en doel
+                    markNoteAsCompleted(nf.selectedNote, nf.findMode, nf.intervalTarget);
                     renderNoteFinderNoteSelect();
+                    renderNoteFinderProgress();
+                    // showVictory();
                 }
             } else {
-                // Fout
                 nf.wrongPositions.push({ string, fret });
                 nf.mistakes++;
             }
@@ -2429,10 +2502,19 @@
 
         function updateNoteFinderStats() {
             const nf = state.noteFinder;
-            document.getElementById('noteFinderTarget').textContent = nf.targetNote || '?';
+            
+            let targetText = nf.targetNote;
+            if (nf.findMode === 'intervals') {
+                targetText = nf.intervalTarget === '♭3' ? 'Minor 3rd (♭3)' : nf.intervalTarget;
+            }
+            
+            document.getElementById('noteFinderTarget').textContent = targetText || '?';
             document.getElementById('nfFound').textContent = nf.foundPositions.length;
             document.getElementById('nfTotal').textContent = nf.allPositions.length;
             document.getElementById('nfMistakes').textContent = nf.mistakes;
+            
+            const shapesUnlocked = document.getElementById('shapesUnlocked');
+            if (shapesUnlocked) shapesUnlocked.style.display = nf.findMode === 'intervals' ? 'none' : 'flex';
         }
 
         function showVictory() {
@@ -2803,23 +2885,31 @@
                 
                 for (let fret = 0; fret <= maxFret; fret++) {
                     const note = getNoteAtFret(str, fret);
-                    
                     let content = '';
                     
                     if (nf.active) {
+                        const isTarget = isSameNote(note, nf.targetNote);
+                        const isRootInIntervalMode = nf.findMode === 'intervals' && isSameNote(note, nf.selectedNote);
                         const isFound = nf.foundPositions.some(p => p.string === str && p.fret === fret);
                         const isWrong = nf.wrongPositions.some(p => p.string === str && p.fret === fret);
                         
-                        if (isFound) {
-                            content = `<div class="note found">${note}</div>`;
+                        if (isRootInIntervalMode) {
+                            content = `<div class="note interval-root">${nf.selectedNote}</div>`;
+                        } else if (isFound) {
+                            if (nf.findMode === 'intervals') {
+                                // Laat de échte noot zien, met het interval symbool er klein onder!
+                                content = `<div class="note interval-target-found with-interval">
+                                    <span class="note-name">${note}</span>
+                                    <span class="interval-name">${nf.intervalTarget}</span>
+                                </div>`;
+                            } else {
+                                content = `<div class="note found">${note}</div>`;
+                            }
                         } else if (isWrong) {
                             content = `<div class="note wrong"></div>`;
                         } else {
                             content = `<div class="note clickable"></div>`;
                         }
-                    } else {
-                        // Niet actief - toon lege fretboard
-                        content = '';
                     }
                     
                     let marker = '';
@@ -2832,19 +2922,16 @@
                 }
             }
             
-            // Event listeners voor Note Finder
             document.querySelectorAll('.fret:not(.open-string)').forEach(f => {
                 f.addEventListener('click', (e) => {
                     const str = parseInt(e.currentTarget.dataset.string);
                     const fret = parseInt(e.currentTarget.dataset.fret);
-                    
                     if (state.noteFinder.active) {
                         handleNoteFinderClick(str, fret);
                     }
                 });
             });
             
-            // Render shape lines after fretboard is built
             setTimeout(() => renderShapeLines(), 50);
         }
 
@@ -3204,21 +3291,111 @@
             });
         }
 
-        function renderNoteFinderControls() {
-            // Fret count toggle
-            document.querySelectorAll('[data-nf-frets]').forEach(btn => {
-                btn.classList.toggle('active', parseInt(btn.dataset.nfFrets) === state.noteFinder.maxFret);
+        function renderNoteFinderNoteSelect() {
+            const container = document.getElementById('noteFinderNoteSelect');
+            if (!container) return;
+            
+            const nf = state.noteFinder;
+            const data = getCompletedTodayData()[getTodayKey()];
+            
+            // Kijk naar de juiste lijst afhankelijk van de modus
+            const completedList = nf.findMode === 'notes' ? data.notes : (data.intervals[nf.intervalTarget] || []);
+            
+            container.innerHTML = NOTES.map(note => {
+                const isCompleted = completedList.includes(note);
+                const isActive = nf.selectedNote === note;
+                
+                return `
+                    <button class="root-note-btn ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}" 
+                            data-nf-note="${note}"
+                            title="${isCompleted ? 'Vandaag voltooid!' : 'Klik om te oefenen'}">
+                        ${note}
+                        ${isCompleted ? '<span class="completed-check">✓</span>' : ''}
+                    </button>
+                `;
+            }).join('');
+            
+            container.querySelectorAll('.root-note-btn').forEach(btn => {
                 btn.onclick = () => {
-                    state.noteFinder.maxFret = parseInt(btn.dataset.nfFrets);
-                    // Herstart alleen als game actief is
-                    if (state.noteFinder.active) {
-                        startNoteFinder();
-                    }
+                    nf.selectedNote = btn.dataset.nfNote;
+                    startNoteFinder();
+                };
+            });
+        }
+
+        function renderNoteFinderProgress() {
+            const container = document.getElementById('noteFinderProgress');
+            if (!container) return;
+            
+            const nf = state.noteFinder;
+            const data = getCompletedTodayData()[getTodayKey()];
+            const completedList = nf.findMode === 'notes' ? data.notes : (data.intervals[nf.intervalTarget] || []);
+            const total = NOTES.length;
+            
+            container.innerHTML = `
+                <span>Vandaag: <strong>${completedList.length}</strong> / ${total} ${nf.findMode === 'notes' ? 'noten' : 'intervallen'}</span>
+                ${completedList.length > 0 ? `
+                    <button class="reset-progress-btn" onclick="resetTodayProgress()" title="Reset voortgang van vandaag">
+                        Reset
+                    </button>
+                ` : ''}
+            `;
+        }
+
+        function renderNoteFinderControls() {
+            const nf = state.noteFinder;
+
+            // Zorg dat standaard fallback goed is als je oude state gebruikt
+            if (nf.intervalTarget === 'b3') nf.intervalTarget = '♭3';
+
+            document.querySelectorAll('[data-nf-frets]').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.nfFrets) === nf.maxFret);
+                btn.onclick = () => {
+                    nf.maxFret = parseInt(btn.dataset.nfFrets);
+                    if (nf.active) startNoteFinder();
                     renderAll();
                 };
             });
+
+            document.querySelectorAll('[data-nf-mode]').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.nfMode === nf.findMode);
+                btn.onclick = () => {
+                    nf.findMode = btn.dataset.nfMode;
+                    resetNoteFinder();
+                    renderAll();
+                };
+            });
+
+            const isIntervals = nf.findMode === 'intervals';
             
-            // Note selection
+            // Interval selector HTML injection (we herbouwen hem even dynamisch voor de teksten)
+            const intervalOptionsContainer = document.getElementById('nfIntervalOptions');
+            if (intervalOptionsContainer) {
+                intervalOptionsContainer.classList.toggle('hidden', !isIntervals);
+                intervalOptionsContainer.innerHTML = `
+                    <h3 style="margin-bottom: 10px; font-size: 0.8rem;"><span class="icon">📏</span> Welk interval wil je vinden?</h3>
+                    <div class="chord-type-selector" style="margin: 0; justify-content: flex-start;">
+                        <button class="chord-type-btn ${nf.intervalTarget === '♭3' ? 'active' : ''}" data-nf-int="♭3">Minor 3rd (♭3)</button>
+                    </div>
+                `;
+                
+                intervalOptionsContainer.querySelectorAll('[data-nf-int]').forEach(btn => {
+                    btn.onclick = () => {
+                        nf.intervalTarget = btn.dataset.nfInt;
+                        if (nf.active) startNoteFinder();
+                        renderAll();
+                    };
+                });
+            }
+
+            document.getElementById('nfTitleMain').innerHTML = isIntervals 
+                ? '<span class="icon">🎵</span> Kies de Grondtoon' 
+                : '<span class="icon">🎵</span> Kies een noot om te oefenen';
+            
+            document.getElementById('nfHelpText').innerHTML = isIntervals
+                ? `1. Kies een <strong style="color:#fff">grondtoon</strong>.<br>2. De grondtonen verschijnen in het <strong style="color:#fff566">geel/rood</strong>.<br>3. Klik op de fretboard om de <strong>Minor 3rd</strong> te vinden.`
+                : `1. Klik op een <strong style="color:#fff">noot</strong>.<br>2. Vind alle posities.<br>3. Voltooide noten krijgen een <strong style="color:#10b981">✓</strong>.`;
+
             renderNoteFinderNoteSelect();
         }
 
@@ -3552,46 +3729,72 @@
             const nf = state.noteFinder;
             
             if (!nf.active) {
-                container.innerHTML = `
-                    <div class="info-section">
-                        <h4>🎯 Note Finder</h4>
-                        <p>Train je geheugen voor nootposities op de fretboard.</p>
-                    </div>
-                    
-                    <div class="info-section">
-                        <h4>Geometrische Patronen</h4>
-                        <p>Dezelfde noot komt op meerdere plekken voor. Deze vormen <strong>geometrische patronen</strong>:</p>
-                        <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <div style="width: 20px; height: 20px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 4px;"></div>
-                                <span style="color: #aaa;">Groene driehoek: E6 → G → E1</span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <div style="width: 20px; height: 20px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 4px;"></div>
-                                <span style="color: #aaa;">Blauwe driehoek: E6 → D → E1</span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <div style="width: 20px; height: 20px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border-radius: 4px;"></div>
-                                <span style="color: #aaa;">Rode driehoek: D → G → B</span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <div style="width: 20px; height: 20px; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 4px;"></div>
-                                <span style="color: #aaa;">Paarse driehoek: G → B → E1 (met B-snaar shift)</span>
+                // Toon de geometrische info alleen als we in notes modus zijn
+                const isIntervals = nf.findMode === 'intervals';
+                if (isIntervals) {
+                     container.innerHTML = `
+                        <div class="info-section">
+                            <h4>🎯 Interval Finder</h4>
+                            <p>Leer de afstanden tussen noten visueel herkennen.</p>
+                        </div>
+                        <div class="info-section">
+                            <h4>Minor 3rd (♭3)</h4>
+                            <p>De kleine terts (Minor 3rd) ligt precies <strong>3 frets (halve stappen)</strong> hoger dan de grondtoon. Het is de noot die een akkoord zijn "droevige" mineurklank geeft.</p>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <div class="info-section">
+                            <h4>🎯 Note Finder</h4>
+                            <p>Train je geheugen voor nootposities op de fretboard.</p>
+                        </div>
+                        <div class="info-section">
+                            <h4>Geometrische Patronen</h4>
+                            <p>Dezelfde noot komt op meerdere plekken voor. Deze vormen <strong>geometrische patronen</strong>:</p>
+                            <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 20px; height: 20px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 4px;"></div>
+                                    <span style="color: #aaa;">Groene driehoek: E6 → G → E1</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 20px; height: 20px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 4px;"></div>
+                                    <span style="color: #aaa;">Blauwe driehoek: E6 → D → E1</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 20px; height: 20px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border-radius: 4px;"></div>
+                                    <span style="color: #aaa;">Rode driehoek: D → G → B</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 20px; height: 20px; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 4px;"></div>
+                                    <span style="color: #aaa;">Paarse driehoek: G → B → E1</span>
+                                </div>
                             </div>
                         </div>
+                    `;
+                }
+                return;
+            }
+
+            if (nf.findMode === 'intervals') {
+                const intervalName = nf.intervalTarget === '♭3' ? 'Minor 3rd (♭3)' : nf.intervalTarget;
+                container.innerHTML = `
+                    <div class="info-section">
+                        <h4>🎯 Zoek: ${intervalName} (vanuit ${nf.selectedNote})</h4>
+                        <p>Klik op alle posities waar de <strong>${intervalName}</strong> te vinden is ten opzichte van de gele grondtonen.</p>
+                        <p style="margin-top: 8px; color: #888;">
+                            Voortgang: <strong style="color: #10b981;">${nf.foundPositions.length}</strong> / ${nf.allPositions.length} posities
+                        </p>
                     </div>
                     
                     <div class="info-section">
-                        <h4>Tips</h4>
-                        <p>• De <strong>lage E</strong> en <strong>hoge E</strong> snaar hebben dezelfde noten</p>
-                        <p style="margin-top: 6px;">• Tussen de meeste snaren zit <strong>5 frets</strong> verschil (behalve G→B: 4 frets)</p>
-                        <p style="margin-top: 6px;">• Fret 12 = dezelfde noot als de open snaar (octaaf hoger)</p>
+                        <h4>Statistieken</h4>
+                        <p>Fouten: <strong style="color: ${nf.mistakes > 0 ? '#ef4444' : '#10b981'};">${nf.mistakes}</strong></p>
                     </div>
                 `;
                 return;
             }
             
-            // Active game info
+            // .. rest van de bestaande Note Finder (notes modus) info weergave...
             const shapesInfo = OCTAVE_SHAPES.map((shape, i) => {
                 const unlocked = nf.unlockedShapes.includes(i);
                 return `
@@ -3610,21 +3813,13 @@
                         Voortgang: <strong style="color: #10b981;">${nf.foundPositions.length}</strong> / ${nf.allPositions.length} posities
                     </p>
                 </div>
-                
                 <div class="info-section">
                     <h4>Ontgrendelde Shapes</h4>
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
-                        ${shapesInfo}
-                    </div>
-                    <p style="margin-top: 12px; color: #888; font-size: 0.85rem;">
-                        Vind 3 noten die een driehoek vormen om een shape te ontgrendelen!
-                    </p>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">${shapesInfo}</div>
                 </div>
-                
                 <div class="info-section">
                     <h4>Statistieken</h4>
                     <p>Fouten: <strong style="color: ${nf.mistakes > 0 ? '#ef4444' : '#10b981'};">${nf.mistakes}</strong></p>
-                    <p style="margin-top: 6px;">Shapes: <strong style="color: #5b8dbf;">${nf.unlockedShapes.length}</strong> / 4</p>
                 </div>
             `;
         }
