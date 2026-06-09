@@ -1914,12 +1914,12 @@
 
         // String groups for triads (snaar indices: 0=e, 1=B, 2=G, 3=D, 4=A, 5=E)
         const STRING_GROUPS = [
+            { id: 'all', strings: [0, 1, 2, 3, 4, 5], name: 'Alle snaren', description: 'Alle posities' },
             { id: 'GBe', strings: [2, 1, 0], name: 'G-B-e', description: 'Hoge snaren' },
             { id: 'DGB', strings: [3, 2, 1], name: 'D-G-B', description: 'Midden-hoog' },
             { id: 'ADG', strings: [4, 3, 2], name: 'A-D-G', description: 'Midden-laag' },
             { id: 'EAD', strings: [5, 4, 3], name: 'E-A-D', description: 'Lage snaren' }
         ];
-
         // Triad inversions
         const TRIAD_INVERSIONS = [
             { id: 'root', name: 'Root Position', bassInterval: '1', description: 'Grondtoon in de bas' },
@@ -2859,9 +2859,24 @@
             const container = document.querySelector('.fretboard-container');
             if (!fretboard || !container) return;
             
-            const shapes = state.showAllInversions 
-                ? getAllTriadShapesForStringGroup(state.triadsRoot, state.triadsChordType, state.selectedStringGroup)
-                : calculateTriadShapes(state.triadsRoot, state.triadsChordType, state.selectedStringGroup, state.selectedInversion);
+            const isAllStrings = state.selectedStringGroup === 'all';
+            
+            let shapes = [];
+            
+            if (isAllStrings) {
+                // Get shapes from all string groups
+                const realStringGroups = STRING_GROUPS.filter(g => g.id !== 'all');
+                realStringGroups.forEach(group => {
+                    const groupShapes = state.showAllInversions 
+                        ? getAllTriadShapesForStringGroup(state.triadsRoot, state.triadsChordType, group.id)
+                        : calculateTriadShapes(state.triadsRoot, state.triadsChordType, group.id, state.selectedInversion);
+                    shapes = shapes.concat(groupShapes);
+                });
+            } else {
+                shapes = state.showAllInversions 
+                    ? getAllTriadShapesForStringGroup(state.triadsRoot, state.triadsChordType, state.selectedStringGroup)
+                    : calculateTriadShapes(state.triadsRoot, state.triadsChordType, state.selectedStringGroup, state.selectedInversion);
+            }
             
             if (shapes.length === 0) return;
             
@@ -3155,11 +3170,25 @@
             
             const triadNotes = getTriadNotes(state.triadsRoot, state.triadsChordType);
             const stringGroup = STRING_GROUPS.find(g => g.id === state.selectedStringGroup);
+            const isAllStrings = state.selectedStringGroup === 'all';
             
             // Get shapes for current settings
-            const shapes = state.showAllInversions 
-                ? getAllTriadShapesForStringGroup(state.triadsRoot, state.triadsChordType, state.selectedStringGroup)
-                : calculateTriadShapes(state.triadsRoot, state.triadsChordType, state.selectedStringGroup, state.selectedInversion);
+            let shapes = [];
+            
+            if (isAllStrings) {
+                // Get shapes from all string groups
+                const realStringGroups = STRING_GROUPS.filter(g => g.id !== 'all');
+                realStringGroups.forEach(group => {
+                    const groupShapes = state.showAllInversions 
+                        ? getAllTriadShapesForStringGroup(state.triadsRoot, state.triadsChordType, group.id)
+                        : calculateTriadShapes(state.triadsRoot, state.triadsChordType, group.id, state.selectedInversion);
+                    shapes = shapes.concat(groupShapes);
+                });
+            } else {
+                shapes = state.showAllInversions 
+                    ? getAllTriadShapesForStringGroup(state.triadsRoot, state.triadsChordType, state.selectedStringGroup)
+                    : calculateTriadShapes(state.triadsRoot, state.triadsChordType, state.selectedStringGroup, state.selectedInversion);
+            }
             
             // Create lookup for triad positions
             const triadPositionLookup = {};
@@ -3178,7 +3207,7 @@
             ).join('');
             
             for (let str = 0; str < 6; str++) {
-                const isInStringGroup = stringGroup.strings.includes(str);
+                const isInStringGroup = isAllStrings || stringGroup.strings.includes(str);
                 fb.innerHTML += `<div class="fret open-string"><span class="string-label">${TUNING[str]}</span></div>`;
                 
                 for (let fret = 0; fret <= state.maxFret; fret++) {
@@ -3189,8 +3218,8 @@
                     let content = '';
                     let fretClass = 'fret';
                     
-                    // Add string highlighting
-                    if (state.highlightStringGroup) {
+                    // Add string highlighting (not for "all" mode)
+                    if (state.highlightStringGroup && !isAllStrings) {
                         if (isInStringGroup) {
                             fretClass += ' string-highlighted';
                         } else {
@@ -3224,8 +3253,21 @@
                             content = `<div class="note ${noteClass}"></div>`;
                         }
                     } else if (isInStringGroup && noteArrayIncludes(triadNotes, note)) {
-                        // Show other triad notes on the string group (dimmed)
-                        content = `<div class="note dimmed">${state.showNotes ? note : ''}</div>`;
+                        // Show other triad notes (dimmed) - works for both specific string groups AND "all strings"
+                        const interval = getTriadInterval(state.triadsRoot, note, state.triadsChordType);
+                        
+                        if (state.showNotes && state.showIntervals) {
+                            content = `<div class="note dimmed with-interval">
+                                <span class="note-name">${note}</span>
+                                <span class="interval-name">${interval}</span>
+                            </div>`;
+                        } else if (state.showNotes) {
+                            content = `<div class="note dimmed">${note}</div>`;
+                        } else if (state.showIntervals) {
+                            content = `<div class="note dimmed">${interval}</div>`;
+                        } else {
+                            content = `<div class="note dimmed"></div>`;
+                        }
                     }
                     
                     let marker = '';
@@ -3252,12 +3294,19 @@
             const triadNotes = getTriadNotes(state.triadsRoot, state.triadsChordType);
             const stringGroup = STRING_GROUPS.find(g => g.id === state.selectedStringGroup);
             const inversion = TRIAD_INVERSIONS.find(i => i.id === state.selectedInversion);
+            const isAllStrings = state.selectedStringGroup === 'all';
             
             const chordName = state.triadsRoot + (state.triadsChordType === 'minor' ? 'm' : '');
             
             document.getElementById('triadTrainerTitle').textContent = `${chordName} Triad`;
-            document.getElementById('triadTrainerSubtitle').textContent = 
-                `Snaren: ${stringGroup.name} | ${state.showAllInversions ? 'Alle inversies' : inversion.name + ' (' + inversion.bassInterval + ' in bas)'}`;
+            
+            let subtitleText = `Snaren: ${stringGroup.name}`;
+            if (!isAllStrings) {
+                subtitleText += ` | ${state.showAllInversions ? 'Alle inversies' : inversion.name + ' (' + inversion.bassInterval + ' in bas)'}`;
+            } else {
+                subtitleText += ` | ${state.showAllInversions ? 'Alle inversies' : inversion.name}`;
+            }
+            document.getElementById('triadTrainerSubtitle').textContent = subtitleText;
             
             document.getElementById('triadInfoRoot').textContent = triadNotes[0];
             document.getElementById('triadInfoThird').textContent = triadNotes[1];
@@ -4283,11 +4332,45 @@
             const triadNotes = getTriadNotes(state.triadsRoot, state.triadsChordType);
             const stringGroup = STRING_GROUPS.find(g => g.id === state.selectedStringGroup);
             const chordName = state.triadsRoot + (state.triadsChordType === 'minor' ? 'm' : '');
+            const isAllStrings = state.selectedStringGroup === 'all';
             
             // Get current shapes
-            const shapes = state.showAllInversions 
-                ? getAllTriadShapesForStringGroup(state.triadsRoot, state.triadsChordType, state.selectedStringGroup)
-                : calculateTriadShapes(state.triadsRoot, state.triadsChordType, state.selectedStringGroup, state.selectedInversion);
+            let shapes = [];
+            if (isAllStrings) {
+                const realStringGroups = STRING_GROUPS.filter(g => g.id !== 'all');
+                realStringGroups.forEach(group => {
+                    const groupShapes = state.showAllInversions 
+                        ? getAllTriadShapesForStringGroup(state.triadsRoot, state.triadsChordType, group.id)
+                        : calculateTriadShapes(state.triadsRoot, state.triadsChordType, group.id, state.selectedInversion);
+                    shapes = shapes.concat(groupShapes);
+                });
+            } else {
+                shapes = state.showAllInversions 
+                    ? getAllTriadShapesForStringGroup(state.triadsRoot, state.triadsChordType, state.selectedStringGroup)
+                    : calculateTriadShapes(state.triadsRoot, state.triadsChordType, state.selectedStringGroup, state.selectedInversion);
+            }
+            
+            // Bepaal de snarengroep sectie op basis van "alle snaren" of specifieke groep
+            const stringGroupSection = isAllStrings ? `
+                <div class="info-section">
+                    <h4>🎸 Alle snarengroepen</h4>
+                    <p>Je ziet nu <strong>alle triad shapes</strong> over de hele fretboard.</p>
+                    <p style="margin-top: 8px; color: #888; font-size: 0.85rem;">
+                        ${shapes.length} shape${shapes.length !== 1 ? 's' : ''} gevonden in totaal.
+                    </p>
+                    <p style="margin-top: 8px; color: #f59e0b; font-size: 0.85rem;">
+                        💡 Tip: Kies een specifieke snarengroep om gefocust te oefenen!
+                    </p>
+                </div>
+            ` : `
+                <div class="info-section">
+                    <h4>🎸 Snarengroep: ${stringGroup.name}</h4>
+                    <p>Je oefent nu op de <strong>${stringGroup.description}</strong> snaren.</p>
+                    <p style="margin-top: 8px; color: #888; font-size: 0.85rem;">
+                        ${shapes.length} shape${shapes.length !== 1 ? 's' : ''} gevonden op deze snarengroep.
+                    </p>
+                </div>
+            `;
             
             container.innerHTML = `
                 <div class="info-section">
@@ -4322,13 +4405,7 @@
                     </div>
                 </div>
                 
-                <div class="info-section">
-                    <h4>🎸 Snarengroep: ${stringGroup.name}</h4>
-                    <p>Je oefent nu op de <strong>${stringGroup.description}</strong> snaren.</p>
-                    <p style="margin-top: 8px; color: #888; font-size: 0.85rem;">
-                        ${shapes.length} shape${shapes.length !== 1 ? 's' : ''} gevonden op deze snarengroep.
-                    </p>
-                </div>
+                ${stringGroupSection}
                 
                 <div class="info-section">
                     <h4>💡 1-Minute Drill (Guitar Mastery Method)</h4>
