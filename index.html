@@ -2380,7 +2380,7 @@
             const unique = [];
             const seen = new Set();
             allPositions.forEach(p => {
-                const key = `$${p.string}-$${p.fret}`;
+                const key = `${p.string}-${p.fret}`;
                 if (!seen.has(key)) {
                     seen.add(key);
                     unique.push(p);
@@ -2572,7 +2572,7 @@
         
         function getTodayKey() {
             const today = new Date();
-            return `$${today.getFullYear()}-$${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
         }
         
         function getCompletedTodayData() {
@@ -2826,7 +2826,7 @@
                         
                         const points = expectedPositions.map(pos => {
                             const fretEl = fretboard.querySelector(
-                                `.fret[data-string="$${pos.string}"][data-fret="$${pos.fret}"]`
+                                `.fret[data-string="${pos.string}"][data-fret="${pos.fret}"]`
                             );
                             if (!fretEl) return null;
                             
@@ -2839,7 +2839,7 @@
                         
                         if (points.length >= 3) {
                             const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                            const d = `M $${points[0].x} $${points[0].y} L $${points[1].x} $${points[1].y} L $${points[2].x} $${points[2].y} Z`;
+                            const d = `M ${points[0].x} ${points[0].y} L ${points[1].x} ${points[1].y} L ${points[2].x} ${points[2].y} Z`;
                             path.setAttribute('d', d);
                             path.setAttribute('class', `shape-line ${shape.color}`);
                             path.setAttribute('fill', 'none');
@@ -2878,7 +2878,7 @@
                 shapes.forEach(shape => {
                     const points = shape.positions.map(pos => {
                         const fretEl = fretboard.querySelector(
-                            `.fret[data-string="$${pos.string}"][data-fret="$${pos.fret}"]`
+                            `.fret[data-string="${pos.string}"][data-fret="${pos.fret}"]`
                         );
                         if (!fretEl) return null;
                         
@@ -2891,7 +2891,7 @@
                     
                     if (points.length >= 3) {
                         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                        const d = `M $${points[0].x} $${points[0].y} L $${points[1].x} $${points[1].y} L $${points[2].x} $${points[2].y} Z`;
+                        const d = `M ${points[0].x} ${points[0].y} L ${points[1].x} ${points[1].y} L ${points[2].x} ${points[2].y} Z`;
                         path.setAttribute('d', d);
                         path.setAttribute('class', 'shape-line orange');
                         path.setAttribute('fill', 'rgba(245, 158, 11, 0.1)');
@@ -2934,8 +2934,8 @@
         function showVictory() {
             const nf = state.noteFinder;
             document.getElementById('victoryStats').innerHTML = `
-                Je hebt alle <strong>$${nf.allPositions.length}</strong> posities van <strong>$${nf.targetNote}</strong> gevonden!<br>
-                <span style="color: #888;">Fouten: $${nf.mistakes} | Shapes: $${nf.unlockedShapes.length}/4</span>
+                Je hebt alle <strong>${nf.allPositions.length}</strong> posities van <strong>${nf.targetNote}</strong> gevonden!<br>
+                <span style="color: #888;">Fouten: ${nf.mistakes} | Shapes: ${nf.unlockedShapes.length}/4</span>
             `;
             document.getElementById('victoryOverlay').classList.add('show');
         }
@@ -3066,9 +3066,9 @@
                                 <span class="interval-name">${interval}</span>
                             </div>`;
                         } else if (state.showNotes) {
-                            content = `<div class="note $${noteClass}">$${note}</div>`;
+                            content = `<div class="note ${noteClass}">${note}</div>`;
                         } else if (state.showIntervals && inScale) {
-                            content = `<div class="note $${noteClass}">$${getIntervalName(state.rootNote, note, state.scaleType)}</div>`;
+                            content = `<div class="note ${noteClass}">${getIntervalName(state.rootNote, note, state.scaleType)}</div>`;
                         } else if (inScale) {
                             content = `<div class="note ${noteClass}"></div>`;
                         }
@@ -3087,7 +3087,7 @@
                         else if (fret === 12) marker = '<div class="fret-marker double"></div>';
                     }
                     
-                    fb.innerHTML += `<div class="fret" data-string="$${str}" data-fret="$${fret}" data-note="$${note}">$${content}${marker}</div>`;
+                    fb.innerHTML += `<div class="fret" data-string="${str}" data-fret="${fret}" data-note="${note}">${content}${marker}</div>`;
                 }
             }
             
@@ -3106,7 +3106,7 @@
             
             const noteLookup = {};
             cagedNotes.forEach(n => {
-                const key = `$${n.string}-$${n.fret}`;
+                const key = `${n.string}-${n.fret}`;
                 if (!noteLookup[key]) noteLookup[key] = n;
             });
             
@@ -3120,7 +3120,7 @@
                 
                 for (let fret = 0; fret <= state.maxFret; fret++) {
                     const note = getNoteAtFret(str, fret, state.cagedRoot);
-                    const key = `$${str}-$${fret}`;
+                    const key = `${str}-${fret}`;
                     const cagedNote = noteLookup[key];
                     
                     let content = '';
@@ -3129,7 +3129,7 @@
                         let noteClass = cagedNote.color;
                         if (state.highlightRoot && cagedNote.isRoot) noteClass = 'root';
                         content = state.showNotes 
-                            ? `<div class="note $${noteClass}">$${note}</div>`
+                            ? `<div class="note ${noteClass}">${note}</div>`
                             : `<div class="note ${noteClass}"></div>`;
                     } else if (!state.showOnlyChordTones) {
                         content = `<div class="note dimmed">${state.showNotes ? note : ''}</div>`;
@@ -3141,7 +3141,7 @@
                         else if (fret === 12) marker = '<div class="fret-marker double"></div>';
                     }
                     
-                    fb.innerHTML += `<div class="fret" data-string="$${str}" data-fret="$${fret}" data-note="$${note}">$${content}${marker}</div>`;
+                    fb.innerHTML += `<div class="fret" data-string="${str}" data-fret="${fret}" data-note="${note}">${content}${marker}</div>`;
                 }
             }
             
@@ -3164,7 +3164,7 @@
             const triadPositionLookup = {};
             shapes.forEach(shape => {
                 shape.positions.forEach(pos => {
-                    const key = `$${pos.string}-$${pos.fret}`;
+                    const key = `${pos.string}-${pos.fret}`;
                     if (!triadPositionLookup[key]) {
                         triadPositionLookup[key] = pos;
                     }
@@ -3182,7 +3182,7 @@
                 
                 for (let fret = 0; fret <= state.maxFret; fret++) {
                     const note = getNoteAtFret(str, fret, state.triadsRoot);
-                    const key = `$${str}-$${fret}`;
+                    const key = `${str}-${fret}`;
                     const triadPos = triadPositionLookup[key];
                     
                     let content = '';
@@ -3216,9 +3216,9 @@
                                 <span class="interval-name">${triadPos.interval}</span>
                             </div>`;
                         } else if (state.showNotes) {
-                            content = `<div class="note $${noteClass}">$${note}</div>`;
+                            content = `<div class="note ${noteClass}">${note}</div>`;
                         } else if (state.showIntervals) {
-                            content = `<div class="note $${noteClass}">$${triadPos.interval}</div>`;
+                            content = `<div class="note ${noteClass}">${triadPos.interval}</div>`;
                         } else {
                             content = `<div class="note ${noteClass}"></div>`;
                         }
@@ -3233,7 +3233,7 @@
                         else if (fret === 12) marker = '<div class="fret-marker double"></div>';
                     }
                     
-                    fb.innerHTML += `<div class="$${fretClass}" data-string="$${str}" data-fret="$${fret}" data-note="$${note}">$${content}$${marker}</div>`;
+                    fb.innerHTML += `<div class="${fretClass}" data-string="${str}" data-fret="${fret}" data-note="${note}">${content}${marker}</div>`;
                 }
             }
             
@@ -3256,7 +3256,7 @@
             
             document.getElementById('triadTrainerTitle').textContent = `${chordName} Triad`;
             document.getElementById('triadTrainerSubtitle').textContent = 
-                `Snaren: $${stringGroup.name} | $${state.showAllInversions ? 'Alle inversies' : inversion.name + ' (' + inversion.bassInterval + ' in bas)'}`;
+                `Snaren: ${stringGroup.name} | ${state.showAllInversions ? 'Alle inversies' : inversion.name + ' (' + inversion.bassInterval + ' in bas)'}`;
             
             document.getElementById('triadInfoRoot').textContent = triadNotes[0];
             document.getElementById('triadInfoThird').textContent = triadNotes[1];
@@ -3325,10 +3325,10 @@
                                     <span class="interval-name">${interval}</span>
                                 </div>`;
                             } else if (state.showNotes) {
-                                content = `<div class="note $${noteClass}">$${note}</div>`;
+                                content = `<div class="note ${noteClass}">${note}</div>`;
                             } else if (state.showIntervals) {
                                 const interval = getIntervalName(state.backingRoot, note, state.backingScale);
-                                content = `<div class="note $${noteClass}">$${interval}</div>`;
+                                content = `<div class="note ${noteClass}">${interval}</div>`;
                             } else {
                                 content = `<div class="note ${noteClass}"></div>`;
                             }
@@ -3339,7 +3339,7 @@
                         if (isInAnyChord) {
                             if (chordMembership.length === 1) {
                                 const colorIdx = chordMembership[0] % CHORD_COLORS.length;
-                                noteStyle = `background: $${CHORD_COLORS[colorIdx].bg}; box-shadow: 0 0 10px $${CHORD_COLORS[colorIdx].hex}40;`;
+                                noteStyle = `background: ${CHORD_COLORS[colorIdx].bg}; box-shadow: 0 0 10px ${CHORD_COLORS[colorIdx].hex}40;`;
                             } else {
                                 const anglePerChord = 360 / chordMembership.length;
                                 let gradientParts = [];
@@ -3347,7 +3347,7 @@
                                     const color = CHORD_COLORS[chordIdx % CHORD_COLORS.length].hex;
                                     const startAngle = i * anglePerChord;
                                     const endAngle = (i + 1) * anglePerChord;
-                                    gradientParts.push(`$${color} $${startAngle}deg ${endAngle}deg`);
+                                    gradientParts.push(`${color} ${startAngle}deg ${endAngle}deg`);
                                 });
                                 noteStyle = `background: conic-gradient(${gradientParts.join(', ')}); box-shadow: 0 0 12px rgba(255,255,255,0.3);`;
                             }
@@ -3359,10 +3359,10 @@
                                     <span class="interval-name">${interval}</span>
                                 </div>`;
                             } else if (state.showNotes) {
-                                content = `<div class="note" style="$${noteStyle}">$${note}</div>`;
+                                content = `<div class="note" style="${noteStyle}">${note}</div>`;
                             } else if (state.showIntervals) {
                                 const interval = getIntervalName(state.backingRoot, note, state.backingScale);
-                                content = `<div class="note" style="$${noteStyle}">$${interval}</div>`;
+                                content = `<div class="note" style="${noteStyle}">${interval}</div>`;
                             } else {
                                 content = `<div class="note" style="${noteStyle}"></div>`;
                             }
@@ -3376,10 +3376,10 @@
                                     <span class="interval-name">${interval}</span>
                                 </div>`;
                             } else if (state.showNotes) {
-                                content = `<div class="note" style="$${scaleStyle}">$${note}</div>`;
+                                content = `<div class="note" style="${scaleStyle}">${note}</div>`;
                             } else if (state.showIntervals) {
                                 const interval = getIntervalName(state.backingRoot, note, state.backingScale);
-                                content = `<div class="note" style="$${scaleStyle}">$${interval}</div>`;
+                                content = `<div class="note" style="${scaleStyle}">${interval}</div>`;
                             } else {
                                 content = `<div class="note" style="${scaleStyle}"></div>`;
                             }
@@ -3394,7 +3394,7 @@
                         else if (fret === 12) marker = '<div class="fret-marker double"></div>';
                     }
                     
-                    fb.innerHTML += `<div class="fret" data-string="$${str}" data-fret="$${fret}" data-note="$${note}">$${content}${marker}</div>`;
+                    fb.innerHTML += `<div class="fret" data-string="${str}" data-fret="${fret}" data-note="${note}">${content}${marker}</div>`;
                 }
             }
             
@@ -3450,7 +3450,7 @@
                         else if (fret === 12) marker = '<div class="fret-marker double"></div>';
                     }
                     
-                    fb.innerHTML += `<div class="fret" data-string="$${str}" data-fret="$${fret}" data-note="$${note}">$${content}${marker}</div>`;
+                    fb.innerHTML += `<div class="fret" data-string="${str}" data-fret="${fret}" data-note="${note}">${content}${marker}</div>`;
                 }
             }
             
@@ -3576,7 +3576,7 @@
         function renderRootNotes() {
             const container = document.getElementById('rootNotes');
             container.innerHTML = NOTES.map(note => `
-                <button class="root-note-btn $${state.rootNote === note ? 'active' : ''}" data-note="$${note}">${note}</button>
+                <button class="root-note-btn ${state.rootNote === note ? 'active' : ''}" data-note="${note}">${note}</button>
             `).join('');
             
             container.querySelectorAll('.root-note-btn').forEach(btn => {
@@ -3587,7 +3587,7 @@
         function renderCAGEDRootNotes() {
             const container = document.getElementById('cagedRootNotes');
             container.innerHTML = NOTES.map(note => `
-                <button class="root-note-btn $${state.cagedRoot === note ? 'active' : ''}" data-note="$${note}">${note}</button>
+                <button class="root-note-btn ${state.cagedRoot === note ? 'active' : ''}" data-note="${note}">${note}</button>
             `).join('');
             
             container.querySelectorAll('.root-note-btn').forEach(btn => {
@@ -3606,7 +3606,7 @@
         function renderTriadsRootNotes() {
             const container = document.getElementById('triadsRootNotes');
             container.innerHTML = NOTES.map(note => `
-                <button class="root-note-btn $${state.triadsRoot === note ? 'active' : ''}" data-note="$${note}">${note}</button>
+                <button class="root-note-btn ${state.triadsRoot === note ? 'active' : ''}" data-note="${note}">${note}</button>
             `).join('');
             
             container.querySelectorAll('.root-note-btn').forEach(btn => {
@@ -3672,7 +3672,7 @@
         function renderBackingRootNotes() {
             const container = document.getElementById('backingRootNotes');
             container.innerHTML = NOTES.map(note => `
-                <button class="root-note-btn $${state.backingRoot === note ? 'active' : ''}" data-note="$${note}">${note}</button>
+                <button class="root-note-btn ${state.backingRoot === note ? 'active' : ''}" data-note="${note}">${note}</button>
             `).join('');
             
             container.querySelectorAll('.root-note-btn').forEach(btn => {
@@ -3730,7 +3730,7 @@
                 ${state.backingChords.map((chord, i) => `
                     <div class="backing-legend-item">
                         <div class="backing-legend-dot" style="background: ${CHORD_COLORS[i % CHORD_COLORS.length].bg};"></div>
-                        <span>$${chord.name} ($${getChordNotes(chord.root, chord.type).join('-')})</span>
+                        <span>${chord.name} (${getChordNotes(chord.root, chord.type).join('-')})</span>
                     </div>
                 `).join('')}
             `;
@@ -3753,13 +3753,13 @@
                     <div class="chord-picker-roots">
                         ${NOTES.map(note => `
                             <button class="chord-picker-root ${state.chordPickerRoot === note ? 'active' : ''}" 
-                                    data-note="$${note}">$${note}</button>
+                                    data-note="${note}">${note}</button>
                         `).join('')}
                     </div>
                     <div class="chord-picker-types">
                         ${CHORD_TYPES.map(type => `
                             <button class="chord-picker-type" data-type="${type.key}">
-                                $${state.chordPickerRoot}$${type.suffix || ''} (${type.label})
+                                ${state.chordPickerRoot}${type.suffix || ''} (${type.label})
                             </button>
                         `).join('')}
                     </div>
@@ -3788,7 +3788,7 @@
         function renderScaleTypes() {
             const container = document.getElementById('scaleTypes');
             container.innerHTML = Object.entries(SCALES).map(([key, scale]) => `
-                <button class="scale-btn $${state.scaleType === key ? 'active' : ''}" data-scale="$${key}">
+                <button class="scale-btn ${state.scaleType === key ? 'active' : ''}" data-scale="${key}">
                     ${scale.name}
                     <small>${scale.description}</small>
                 </button>
@@ -3805,7 +3805,7 @@
             
             container.innerHTML = boxes.map((box, i) => `
                 <button class="box-btn ${state.selectedBox === (i === 0 ? null : i - 1) ? 'active' : ''}" 
-                        data-box="$${i === 0 ? 'null' : i - 1}">$${box}</button>
+                        data-box="${i === 0 ? 'null' : i - 1}">${box}</button>
             `).join('');
             
             container.querySelectorAll('.box-btn').forEach(btn => {
@@ -3823,8 +3823,8 @@
             container.innerHTML = `
                 <button class="caged-shape-btn ${state.showAllShapes ? 'active' : ''}" data-shape="all">Alle</button>
             ` + CAGED_SEQUENCE.map(shape => `
-                <button class="caged-shape-btn shape-$${shape.toLowerCase()} $${!state.showAllShapes && state.selectedCagedShape === shape ? 'active' : ''}" 
-                        data-shape="$${shape}">$${shape}</button>
+                <button class="caged-shape-btn shape-${shape.toLowerCase()} ${!state.showAllShapes && state.selectedCagedShape === shape ? 'active' : ''}" 
+                        data-shape="${shape}">${shape}</button>
             `).join('');
             
             container.querySelectorAll('.caged-shape-btn').forEach(btn => {
@@ -3842,7 +3842,7 @@
             
             const infoContainer = document.getElementById('cagedPositionInfo');
             infoContainer.innerHTML = positions.map(pos => `
-                <div class="caged-position-card shape-$${pos.shape.toLowerCase()} $${state.selectedCagedShape === pos.shape ? 'active' : ''}"
+                <div class="caged-position-card shape-${pos.shape.toLowerCase()} ${state.selectedCagedShape === pos.shape ? 'active' : ''}"
                      data-shape="${pos.shape}">
                     <span class="shape-name">${pos.shape}</span>
                     <span class="fret-range">fret ${pos.baseFret}</span>
@@ -3865,7 +3865,7 @@
                     <span class="toggle-label">${t.label}
                         <span class="toggle-help">?<span class="tooltip">${t.help}</span></span>
                     </span>
-                    <div class="toggle-switch $${state[t.key] ? 'active' : ''}" data-toggle="$${t.key}"></div>
+                    <div class="toggle-switch ${state[t.key] ? 'active' : ''}" data-toggle="${t.key}"></div>
                 </div>
             `).join('');
             
@@ -3881,7 +3881,7 @@
                     <span class="toggle-label">${t.label}
                         <span class="toggle-help">?<span class="tooltip">${t.help}</span></span>
                     </span>
-                    <div class="toggle-switch $${state[t.key] ? 'active' : ''}" data-toggle="$${t.key}"></div>
+                    <div class="toggle-switch ${state[t.key] ? 'active' : ''}" data-toggle="${t.key}"></div>
                 </div>
             `).join('');
             
@@ -3897,7 +3897,7 @@
                     <span class="toggle-label">${t.label}
                         <span class="toggle-help">?<span class="tooltip">${t.help}</span></span>
                     </span>
-                    <div class="toggle-switch $${state[t.key] ? 'active' : ''}" data-toggle="$${t.key}"></div>
+                    <div class="toggle-switch ${state[t.key] ? 'active' : ''}" data-toggle="${t.key}"></div>
                 </div>
             `).join('');
             
@@ -3913,7 +3913,7 @@
                     <span class="toggle-label">${t.label}
                         <span class="toggle-help">?<span class="tooltip">${t.help}</span></span>
                     </span>
-                    <div class="toggle-switch $${state[t.key] ? 'active' : ''}" data-toggle="$${t.key}"></div>
+                    <div class="toggle-switch ${state[t.key] ? 'active' : ''}" data-toggle="${t.key}"></div>
                 </div>
             `).join('');
             
@@ -3936,7 +3936,7 @@
                 const isActive = nf.selectedNote === note;
                 
                 return `
-                    <button class="root-note-btn $${isActive ? 'active' : ''} $${isCompleted ? 'completed' : ''}" 
+                    <button class="root-note-btn ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}" 
                             data-nf-note="${note}"
                             title="${isCompleted ? 'Vandaag voltooid!' : 'Klik om te oefenen'}">
                         ${note}
@@ -3963,7 +3963,7 @@
             const total = NOTES.length;
             
             container.innerHTML = `
-                <span>Vandaag: <strong>$${completedList.length}</strong> / $${total} ${nf.findMode === 'notes' ? 'noten' : 'intervallen'}</span>
+                <span>Vandaag: <strong>${completedList.length}</strong> / ${total} ${nf.findMode === 'notes' ? 'noten' : 'intervallen'}</span>
                 ${completedList.length > 0 ? `
                     <button class="reset-progress-btn" onclick="resetTodayProgress()" title="Reset voortgang van vandaag">
                         Reset
@@ -4036,7 +4036,7 @@
             ];
             
             container.innerHTML = modes.map(m => `
-                <button class="mode-btn $${state.mode === m.key ? 'active' : ''}" data-mode="$${m.key}">${m.label}</button>
+                <button class="mode-btn ${state.mode === m.key ? 'active' : ''}" data-mode="${m.key}">${m.label}</button>
             `).join('');
             
             container.querySelectorAll('.mode-btn').forEach(btn => {
@@ -4061,17 +4061,17 @@
             }
             
             container.classList.add('active');
-            document.getElementById('quizScore').textContent = `Score: $${state.quizScore} / $${state.quizTotal}`;
+            document.getElementById('quizScore').textContent = `Score: ${state.quizScore} / ${state.quizTotal}`;
             
             if (!state.currentQuiz) generateQuiz();
             
             if (state.mode === 'quizNote') {
                 const stringNames = ['hoge E', 'B', 'G', 'D', 'A', 'lage E'];
                 document.getElementById('quizQuestion').textContent = 
-                    `Welke noot: $${stringNames[state.currentQuiz.string]}-snaar, fret $${state.currentQuiz.fret}?`;
+                    `Welke noot: ${stringNames[state.currentQuiz.string]}-snaar, fret ${state.currentQuiz.fret}?`;
                 
                 document.getElementById('quizOptions').innerHTML = state.currentQuiz.options.map(o => 
-                    `<button class="quiz-option" data-answer="$${o}">$${o}</button>`
+                    `<button class="quiz-option" data-answer="${o}">${o}</button>`
                 ).join('');
                 
                 document.querySelectorAll('.quiz-option').forEach(btn => {
@@ -4144,8 +4144,8 @@
                 });
             }
             
-            const fretEl = document.querySelector(`.fret[data-string="$${state.currentQuiz.string}"][data-fret="$${state.currentQuiz.fret}"]`);
-            if (fretEl) fretEl.innerHTML = `<div class="note $${correct ? 'root' : 'chord-tone'}">$${state.currentQuiz.correctAnswer}</div>`;
+            const fretEl = document.querySelector(`.fret[data-string="${state.currentQuiz.string}"][data-fret="${state.currentQuiz.fret}"]`);
+            if (fretEl) fretEl.innerHTML = `<div class="note ${correct ? 'root' : 'chord-tone'}">${state.currentQuiz.correctAnswer}</div>`;
             
             renderQuiz();
         }
@@ -4159,12 +4159,12 @@
             if (correct) state.quizScore++;
             
             state.currentQuiz.validPositions.forEach(p => {
-                const el = document.querySelector(`.fret[data-string="$${p.string}"][data-fret="$${p.fret}"]`);
+                const el = document.querySelector(`.fret[data-string="${p.string}"][data-fret="${p.fret}"]`);
                 if (el) el.innerHTML = `<div class="note root">${state.currentQuiz.targetNote}</div>`;
             });
             
             if (!correct) {
-                const el = document.querySelector(`.fret[data-string="$${str}"][data-fret="$${fret}"]`);
+                const el = document.querySelector(`.fret[data-string="${str}"][data-fret="${fret}"]`);
                 const note =getNoteAtFret(str, fret, state.rootNote);
                 if (el) el.innerHTML = `<div class="note" style="background:#ef4444">${note}</div>`;
             }
